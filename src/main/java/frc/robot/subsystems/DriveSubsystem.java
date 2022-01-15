@@ -4,9 +4,13 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.PigeonIMU;
-
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
@@ -16,8 +20,10 @@ public class DriveSubsystem extends SubsystemBase {
   
   private WPI_TalonFX leftFalcon1, leftFalcon2, rightFalcon1, rightFalcon2;  
 
-  private PigeonIMU gyro;
+  private final PigeonIMU m_gyro = new PigeonIMU(DriveConstants.GYRO_ID);
   
+  private final DifferentialDriveOdometry m_odometry;
+
   // The robot's drive
   public final DifferentialDrive m_drive;
 
@@ -47,8 +53,11 @@ public class DriveSubsystem extends SubsystemBase {
     leftFalcon1.setNeutralMode(NeutralMode.Brake);
     rightFalcon1.setNeutralMode(NeutralMode.Brake);
     resetEncoders();
+
+    m_odometry = new DifferentialDriveOdometry(m_gyro.);
+
   
-    gyro = new PigeonIMU(DriveConstants.GYRO_ID);
+    PigeonIMU gyro = new PigeonIMU(DriveConstants.GYRO_ID); 
 
     driveMode = DriveMode.CHEEZY;
   }
@@ -98,12 +107,12 @@ public class DriveSubsystem extends SubsystemBase {
 
   public double getAngle(){
     double [] ypr = new double[3];
-    gyro.getYawPitchRoll(ypr);
+    m_gyro.getYawPitchRoll(ypr);
     return ypr[0];
   }
 
   public void resetGyro(){
-    gyro.setYaw(0);
+    m_gyro.setYaw(0);
   }
 
   public double getRawEncoder() {
@@ -117,4 +126,18 @@ public class DriveSubsystem extends SubsystemBase {
   public void setDriveMode(DriveMode driveMode){
     this.driveMode = driveMode;
   }
+
+  public void resetOdomotery(Pose2d pose){
+    resetEncoders();
+    m_odometry.resetPosition(pose, PigeonIMU.getRotation2d());
+  }
+
+  public void tankDriveVolts(double leftVolts, double rightVolts) {
+    leftFalcon1.setVoltage(leftVolts);
+    leftFalcon2.setVoltage(leftVolts);
+    rightFalcon1.setVoltage(rightVolts);
+    rightFalcon2.setVoltage(rightVolts);
+    m_drive.feed();
+  }
+
 }

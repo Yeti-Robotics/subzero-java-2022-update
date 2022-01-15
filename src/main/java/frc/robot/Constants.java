@@ -55,7 +55,16 @@ public final class Constants {
     }
 
     public static final class OIConstants{
-        
+       public static final int DRIVER_STATION_JOY = 0;
+    }
+
+    public static final class AutoConstants{
+
+        public static final double kMaxSpeedInchesPerSecond = 192;
+        public static final double kMaxAccelerationInchesPerSecondSquared = 118.110236;
+        public static final double kRamseteB = 78.7402;
+        public static final double kRamseteZeta = 0.7;
+
     }
 
 }
