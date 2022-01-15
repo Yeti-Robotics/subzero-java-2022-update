@@ -5,6 +5,9 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.math.util.Units;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.PigeonIMU;
 import edu.wpi.first.wpilibj.Encoder;
@@ -19,6 +22,9 @@ import frc.robot.Constants.DriveConstants;
 public class DriveSubsystem extends SubsystemBase {
   
   private WPI_TalonFX leftFalcon1, leftFalcon2, rightFalcon1, rightFalcon2;  
+  private Pose2d pose;
+  private DifferentialDriveWheelSpeeds wheelSpeeds; 
+
 
   private final PigeonIMU m_gyro = new PigeonIMU(DriveConstants.GYRO_ID);
   
@@ -54,17 +60,27 @@ public class DriveSubsystem extends SubsystemBase {
     rightFalcon1.setNeutralMode(NeutralMode.Brake);
     resetEncoders();
 
-    m_odometry = new DifferentialDriveOdometry(m_gyro.);
+    PigeonIMU m_gyro = new PigeonIMU(DriveConstants.GYRO_ID); 
+
+    m_odometry = new DifferentialDriveOdometry(getHeading());
+
+    pose = new Pose2d();
+    wheelSpeeds = new DifferentialDriveWheelSpeeds();
 
   
-    PigeonIMU gyro = new PigeonIMU(DriveConstants.GYRO_ID); 
 
     driveMode = DriveMode.CHEEZY;
   }
 
   @Override
   public void periodic(){
+    wheelSpeeds.leftMetersPerSecond = getMetersPerSecondFromEncoder(leftFalcon1.getSelectedSensorVelocity()); 
+    wheelSpeeds.rightMetersPerSecond = getMetersPerSecondFromEncoder(rightFalcon1.getSelectedSensorVelocity()); 
+    // update pose using gyro and encoder values
+    pose = m_odometry.update(getHeading(), wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
     // System.out.println(getAngle());
+    var translation = m_odometry.getPoseMeters().getTranslation();
+    System.out.println("X: " + translation.getX() + ", Y: " + translation.getY());
   }
 
   public void tankDrive(double leftpower, double rightpower) {
@@ -111,12 +127,24 @@ public class DriveSubsystem extends SubsystemBase {
     return ypr[0];
   }
 
+  private Rotation2d getHeading() {
+    return Rotation2d.fromDegrees(-getAngle());
+  } 
+
+  public Pose2d getPose() {
+    return pose;
+  }
+
   public void resetGyro(){
     m_gyro.setYaw(0);
   }
 
   public double getRawEncoder() {
     return leftFalcon1.getSelectedSensorPosition(); //temp method
+  }
+
+  public DifferentialDriveWheelSpeeds getWheelSpeeds(){
+    return wheelSpeeds;
   }
 
   public DriveMode getDriveMode(){
@@ -127,9 +155,14 @@ public class DriveSubsystem extends SubsystemBase {
     this.driveMode = driveMode;
   }
 
-  public void resetOdomotery(Pose2d pose){
+  public void resetOdometry(Pose2d pose){
     resetEncoders();
-    m_odometry.resetPosition(pose, PigeonIMU.getRotation2d());
+    m_odometry.resetPosition(pose, getHeading());
+  }
+
+  private double getMetersPerSecondFromEncoder(double raw){
+    double ratio = (ShiftingGearSubsystem.getShifterPosition() == ShiftingGearSubsystem.ShiftStatus.HIGH ? DriveConstants.HIGH_GEAR_RATIO : DriveConstants.LOW_GEAR_RATIO);
+    return (10.0 * raw * 2.0 * Math.PI * Units.inchesToMeters(DriveConstants.WHEEL_RADIUS)) / (2048.0 * ratio);
   }
 
   public void tankDriveVolts(double leftVolts, double rightVolts) {

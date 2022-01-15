@@ -18,6 +18,8 @@ public final class Constants {
 
     public static final class DriveConstants {
 
+        public static final double WHEEL_RADIUS = 2.0;
+
         public static final int LEFT_FALCON_1 = 1;
         public static final int LEFT_FALCON_2 = 2;
         public static final int RIGHT_FALCON_1 = 3;
