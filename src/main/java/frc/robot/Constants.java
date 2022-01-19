@@ -18,6 +18,8 @@ public final class Constants {
 
     public static final class DriveConstants {
 
+        public static final double WHEEL_RADIUS = 2.0;
+
         public static final int LEFT_FALCON_1 = 1;
         public static final int LEFT_FALCON_2 = 2;
         public static final int RIGHT_FALCON_1 = 3;
@@ -55,7 +57,16 @@ public final class Constants {
     }
 
     public static final class OIConstants{
-        
+       public static final int DRIVER_STATION_JOY = 0;
+    }
+
+    public static final class AutoConstants{
+
+        public static final double kMaxSpeedInchesPerSecond = 192;
+        public static final double kMaxAccelerationInchesPerSecondSquared = 118.110236;
+        public static final double kRamseteB = 78.7402;
+        public static final double kRamseteZeta = 0.7;
+
     }
 
 }
