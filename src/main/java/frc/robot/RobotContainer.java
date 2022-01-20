@@ -1,30 +1,61 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package frc.robot;
 
-
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.RamseteController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.commands.ToggleShiftingCommand;
-import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.ShiftingGearSubsystem;
-
-
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.AllInCommand;
+import frc.robot.commands.AllInShootCommand;
+import frc.robot.commands.AllOutCommand;
+import frc.robot.commands.autonav.BarrelRacingCommandGroup;
+import frc.robot.commands.autonav.BouncePathCommandGroup;
+import frc.robot.commands.autonav.SlalomCommandGroup;
+import frc.robot.commands.drivetrain.DriveForDistanceCommand;
+import frc.robot.commands.drivetrain.ToggleShiftingCommand;
+import frc.robot.commands.drivetrain.DriveForDistanceLowPIDCommand;
+import frc.robot.commands.drivetrain.DriveForDistanceProfiledPIDCommand;
+import frc.robot.commands.drivetrain.ToggleDriveModeCommand;
+import frc.robot.commands.drivetrain.TurnForAnglePIDCommand;
+import frc.robot.commands.groups.AimTurretAndHoodCommandGroup;
+import frc.robot.commands.groups.FireBallCommandGroup;
+import frc.robot.commands.hood.SetCalcHoodAngleCommand;
+import frc.robot.commands.hood.TestHoodCommand;
+import frc.robot.commands.hopper.HopperInCommand;
+import frc.robot.commands.intake.IntakeInCommand;
+import frc.robot.commands.intake.ToggleIntakePistonCommand;
+import frc.robot.commands.pinchroller.PinchRollerInCommand;
+import frc.robot.commands.replay.InitiateRecordingCommand;
+import frc.robot.commands.replay.PlayRecordingCommand;
+import frc.robot.commands.replay.TerminateAndSaveRecordingCommand;
+import frc.robot.commands.shooter.SpinToRPMCommand;
+import frc.robot.commands.shooter.StopFullIntakeCommand;
+import frc.robot.commands.shooter.StopShooterCommand;
+import frc.robot.commands.shooter.ShootingCommand;
+import frc.robot.commands.shooter.ToggleShooterCommand;
+import frc.robot.commands.turret.CalibrateTurretCommand;
+import frc.robot.commands.turret.TurnToAnglePIDCommand;
+import frc.robot.commands.turret.TurnToTargetPIDCommand;
+import frc.robot.commands.turret.TurretTestCommand;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.XboxController.Button;
+import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.Constants.HoodConstants;
+import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.TurretConstants;
+import frc.robot.subsystems.*;
+import frc.robot.subsystems.DrivetrainSubsystem.DriveMode;
+import frc.robot.utils.Limelight;
+import frc.robot.utils.XboxTrigger;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -35,14 +66,22 @@ import java.util.List;
  */
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
-    private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-    private DriverStation driverStation;
     private CommandScheduler commandScheduler;
     public Joystick driverStationJoystick;
     private XboxController xboxController; 
+    private XboxTrigger rightTrigger; 
+    private XboxTrigger leftTrigger;
     public boolean isDriverStation;
 
-    public DriveSubsystem drivetrainSubsystem;
+    public DrivetrainSubsystem drivetrainSubsystem;
+    public ShooterSubsystem shooterSubsystem;
+    public IntakeSubsystem intakeSubsystem;
+    public HopperSubsystem hopperSubsystem;
+    public Limelight limelight;
+    public PinchRollerSubsystem pinchRollerSubsystem;
+    public HoodSubsystem hoodSubsystem;
+    public TurretSubsystem turretSubsystem;
+    public LEDSubsystem ledSubsystem;
     public ShiftingGearSubsystem shiftingGearSubsystem;
     private HashMap<Integer, CommandBase> buttonMap;
 
@@ -50,24 +89,33 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        driverStation = DriverStation.getInstance();
         commandScheduler = CommandScheduler.getInstance();
         
+        // isDriverStation = !DriverStation.getJoystickIsXbox(OIConstants.XBOX_PORT); 
+        isDriverStation = true;
 
-        drivetrainSubsystem = new DriveSubsystem();
+        shooterSubsystem = new ShooterSubsystem();
+        intakeSubsystem = new IntakeSubsystem();
+        drivetrainSubsystem = new DrivetrainSubsystem();
+        hopperSubsystem = new HopperSubsystem();
+        limelight = new Limelight();
+        pinchRollerSubsystem = new PinchRollerSubsystem();
+        hoodSubsystem = new HoodSubsystem();
+        turretSubsystem = new TurretSubsystem();
+        ledSubsystem = new LEDSubsystem();
         shiftingGearSubsystem = new ShiftingGearSubsystem();
         buttonMap = new HashMap<>();
         
-        switch (drivetrainSubsystem.getDriveMode()) {
-            case TANK:
+        // switch (drivetrainSubsystem.getDriveMode()) {
+        //     case TANK:
             drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.tankDrive(getLeftY(), getRightY()), drivetrainSubsystem));
-            break;
-            case CHEEZY:
-            drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.cheezyDrive(getLeftY(), getRightX()), drivetrainSubsystem));
-            break;
-            case ARCADE:
-            drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.arcadeDrive(getLeftY(), getRightX()), drivetrainSubsystem));
-        }
+        //     break;
+        //     case CHEEZY:
+        //     drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.cheezyDrive(getLeftY(), getRightX()), drivetrainSubsystem));
+        //     break;
+        //     case ARCADE:
+        //     drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.arcadeDrive(getLeftY(), getRightX()), drivetrainSubsystem));
+        // }
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -87,30 +135,60 @@ public class RobotContainer {
         // setJoystickButtonWhileHeld(driverStationJoystick, 11, new IntakeInCommand(intakeSubsystem));
         
         if(isDriverStation){
-            driverStationJoystick = new Joystick(Constants.OIConstants.DRIVER_STATION_JOY);
+            driverStationJoystick = new Joystick(OIConstants.DRIVER_STATION_JOY);
+            setJoystickButtonWhenPressed(driverStationJoystick, 1, new TurnToTargetPIDCommand(turretSubsystem));
+            setJoystickButtonWhileHeld(driverStationJoystick, 2, new AllInCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
+            setJoystickButtonWhenPressed(driverStationJoystick, 3, new ToggleShooterCommand(shooterSubsystem));
+            setJoystickButtonWhileHeld(driverStationJoystick, 4, new TestHoodCommand(hoodSubsystem, HoodConstants.HOOD_SPEED)); //up
+            setJoystickButtonWhileHeld(driverStationJoystick, 5, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED)); //right
+            
+            setJoystickButtonWhileHeld(driverStationJoystick, 6, new IntakeInCommand(intakeSubsystem));
+            setJoystickButtonWhileHeld(driverStationJoystick, 7, new AllOutCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
+            //button 8 not used
+            setJoystickButtonWhileHeld(driverStationJoystick, 9, new TestHoodCommand(hoodSubsystem, -HoodConstants.HOOD_SPEED)); //down
+            setJoystickButtonWhileHeld(driverStationJoystick, 10, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED)); //left
+            
             setJoystickButtonWhenPressed(driverStationJoystick, 11, new ToggleShiftingCommand(shiftingGearSubsystem, drivetrainSubsystem));
+            setJoystickButtonWhenPressed(driverStationJoystick, 12, new ToggleIntakePistonCommand(intakeSubsystem));
         } else {
             /*  
                 Allowed buttons:
                 kA, kB, kBack, kBumperLeft, kBumperRight, kStart, kStickLeft, kStickRight, kX, kY (and triggers)
             */
-            }
+            xboxController = new XboxController(OIConstants.XBOX_PORT); 
+            // rightTrigger = new XboxTrigger(xboxController, Hand.kRight);
+            // leftTrigger = new XboxTrigger(xboxController, Hand.kLeft);
+
+            setXboxButtonWhenPressed(xboxController, Button.kLeftStick, new ToggleShiftingCommand(shiftingGearSubsystem, drivetrainSubsystem));
+            setXboxButtonWhenPressed(xboxController, Button.kRightStick, new ToggleIntakePistonCommand(intakeSubsystem));
+            
+            // setXboxTriggerWhileHeld(Hand.kRight, new AllInCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
+            // setXboxTriggerWhileHeld(Hand.kLeft, new IntakeInCommand(intakeSubsystem));
+            
+            setXboxButtonWhileHeld(xboxController, Button.kLeftBumper, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED));//left
+            setXboxButtonWhileHeld(xboxController, Button.kRightBumper, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
+            
+            setXboxButtonWhenPressed(xboxController, Button.kA, new TurnToTargetPIDCommand(turretSubsystem));
+            setXboxButtonWhenPressed(xboxController, Button.kB, new ToggleShooterCommand(shooterSubsystem));
+            setXboxButtonWhileHeld(xboxController, Button.kY, new TestHoodCommand(hoodSubsystem, HoodConstants.HOOD_SPEED));// up
+            setXboxButtonWhileHeld(xboxController, Button.kX, new TestHoodCommand(hoodSubsystem, -HoodConstants.HOOD_SPEED));// down
+        }
     }
 
     public double getLeftY() {
-        return -driverStationJoystick.getRawAxis(0);
+        return (isDriverStation) ? -driverStationJoystick.getRawAxis(0) : -xboxController.getLeftY();
     }
 
     public double getLeftX() {
-        return driverStationJoystick.getRawAxis(1);
+        return (isDriverStation) ? driverStationJoystick.getRawAxis(1) : -xboxController.getLeftX();
     }
 
     public double getRightY() {
-        return -driverStationJoystick.getRawAxis(2);
+        return (isDriverStation) ? -driverStationJoystick.getRawAxis(2) : -xboxController.getRightY();
     }
 
     public double getRightX() {
-        return driverStationJoystick.getRawAxis(3);
+        return (isDriverStation) ? driverStationJoystick.getRawAxis(3) : -xboxController.getRightX();
     }
 
     public HashMap<Integer, CommandBase> getButtonMap() {
@@ -136,10 +214,25 @@ public class RobotContainer {
         new JoystickButton(xboxController, button.value).whileHeld(command);
     }
 
-    
+    // private void setXboxTriggerWhenPressed(Hand triggerSide, CommandBase command){
+    //     if(triggerSide == Hand.kLeft){ 
+    //         leftTrigger.whenActive(command);
+    //     } else {
+    //         rightTrigger.whenActive(command);
+    //     }
+    // }
+
+    // private void setXboxTriggerWhileHeld(Hand triggerSide, CommandBase command){
+    //     if(triggerSide == Hand.kLeft){ 
+    //         leftTrigger.whileActiveContinuous(command);
+    //     } else {
+    //         rightTrigger.whileActiveContinuous(command);
+    //     }
+    // }
+
     public void updateIsDriverStation(){
         boolean prev = isDriverStation;
-       // isDriverStation = !driverStation.getJoystickIsXbox(OIConstants.XBOX_PORT);
+        isDriverStation = DriverStation.getJoystickIsXbox(OIConstants.XBOX_PORT);
         if (prev == isDriverStation) {
             return;
         } else {
@@ -149,62 +242,9 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        // Create a voltage constraint to ensure we don't accelerate too fast
-    var autoVoltageConstraint =
-    new DifferentialDriveVoltageConstraint(
-        new SimpleMotorFeedforward(
-            Constants.DriveConstants.ksVolts,
-            Constants.DriveConstants.kvVoltSecondsPerInch,
-            Constants.DriveConstants.kaVoltSecondsSquaredPerInch),
-        Constants.DriveConstants.kDriveKinematics,
-        10);
-
-        // Create config for trajectory
-        TrajectoryConfig config =
-            new TrajectoryConfig(
-                    Constants.AutoConstants.kMaxSpeedInchesPerSecond,
-                    Constants.AutoConstants.kMaxAccelerationInchesPerSecondSquared)
-                // Add kinematics to ensure max speed is actually obeyed
-                .setKinematics(DriveConstants.kDriveKinematics)
-                // Apply the voltage constraint
-                .addConstraint(autoVoltageConstraint);
-
-        // An example trajectory to follow.  All units in meters.
-        Trajectory exampleTrajectory =
-            TrajectoryGenerator.generateTrajectory(
-                // Start at the origin facing the +X direction
-                new Pose2d(0, 0, new Rotation2d(0)),
-                // Pass through these two interior waypoints, making an 's' curve path
-                List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-                // End 3 meters straight ahead of where we started, facing forward
-                new Pose2d(3, 0, new Rotation2d(0)),
-                // Pass config
-                config);
-
-        RamseteCommand ramseteCommand = 
-            new RamseteCommand(
-                exampleTrajectory,
-                m_robotDrive::getPose,
-                new RamseteController(Constants.AutoConstants.kRamseteB, Constants.AutoConstants.kRamseteZeta),
-                new SimpleMotorFeedforward(
-                    Constants.DriveConstants.ksVolts,
-                    Constants.DriveConstants.kvVoltSecondsPerInch,
-                    Constants.DriveConstants.kaVoltSecondsSquaredPerInch),
-                Constants.DriveConstants.kDriveKinematics,
-                m_robotDrive::getWheelSpeeds,
-                new PIDController(Constants.DriveConstants.kPDriveVel, 0, 0),
-                new PIDController(Constants.DriveConstants.kPDriveVel, 0, 0),
-                // RamseteCommand passes volts to the callback
-                m_robotDrive::tankDriveVolts,
-                m_robotDrive);
-
-        // Reset odometry to the starting pose of the trajectory.
-        m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
-
-        // Run path following command, then stop at the end.
-        return ramseteCommand.andThen(() -> m_robotDrive.tankDriveVolts(0, 0));
+        Command command = new PlayRecordingCommand("1616845434755recording.txt", drivetrainSubsystem);
+        return command;
     }
-
 
     public boolean getButtonStatus(Joystick joystick, int button) {
         return driverStationJoystick.getRawButton(button);
