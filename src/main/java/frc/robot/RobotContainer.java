@@ -45,6 +45,7 @@ import frc.robot.commands.turret.TurnToTargetPIDCommand;
 import frc.robot.commands.turret.TurretTestCommand;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.OIConstants;
@@ -56,6 +57,10 @@ import frc.robot.utils.XboxTrigger;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import java.util.HashMap;
+
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPlannerTrajectory.PathPlannerState;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -243,7 +248,22 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         Command command = new PlayRecordingCommand("1616845434755recording.txt", drivetrainSubsystem);
+
+        // This will load the file "Example Path.path" and generate it with a max velocity of 8 m/s and a max acceleration of 5 m/s^2
+     //   Trajectory examplePath = PathPlanner.loadPath("Example Path", 4.946, 5);
+       // Trajectory.State exampleState = examplePath.sample(3.29); // seconds
+        //System.out.println(exampleState.velocityMetersPerSecond); //prints velocity in meters per second
+
+
+
+       /* (If we are using holmonic this code is relevant to us) 
+       PathPlannerTrajectory examplePath1 = PathPlanner.loadPath("Example Path", 8, 5); 
+        PathPlannerState exampleState1 = (PathPlannerState) examplePath1.sample(1.2);
+        System.out.println(exampleState1.holonomicRotation.getDegrees()); */ 
         return command;
+
+
+
     }
 
     public boolean getButtonStatus(Joystick joystick, int button) {
