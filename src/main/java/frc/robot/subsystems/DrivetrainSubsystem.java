@@ -10,19 +10,41 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.PigeonIMU;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 
 
 public class DrivetrainSubsystem extends SubsystemBase {
   
   private WPI_TalonFX leftFalcon1, leftFalcon2, rightFalcon1, rightFalcon2;  
+  private MotorControllerGroup leftMotors;
+  private MotorControllerGroup rightMotors;
 
   private PigeonIMU gyro;
-  
+
+  // tracks robot pose (where it is on the field) using gyro & encoder values
+  private DifferentialDriveOdometry odometry; 
+
+  private DifferentialDriveWheelSpeeds wheelSpeeds; 
+  private Pose2d pose; 
+  private SimpleMotorFeedforward feedforward;
+
+  private PIDController leftPIDController;
+  private PIDController rightPIDController;
+
   // The robot's drive
-  public final DifferentialDrive m_drive;
+  public final DifferentialDrive drive;
 
   private DriveMode driveMode;
 
@@ -37,42 +59,58 @@ public class DrivetrainSubsystem extends SubsystemBase {
     rightFalcon1 = new WPI_TalonFX(DriveConstants.RIGHT_FALCON_1);
     rightFalcon2 = new WPI_TalonFX(DriveConstants.RIGHT_FALCON_2);
 
-    rightFalcon1.setInverted(true);
+    leftMotors = new MotorControllerGroup(leftFalcon1, leftFalcon2);
+    rightMotors = new MotorControllerGroup(rightFalcon1, rightFalcon2);
+    rightMotors.setInverted(true);
+    
+    gyro = new PigeonIMU(DriveConstants.GYRO_ID);
 
-    leftFalcon2.follow(leftFalcon1);
-    leftFalcon2.setInverted(InvertType.FollowMaster);
-    rightFalcon2.follow(rightFalcon1);
-    rightFalcon2.setInverted(InvertType.FollowMaster);
+    odometry = new DifferentialDriveOdometry(getHeading());
+    feedforward = new SimpleMotorFeedforward(AutoConstants.ksVolts, AutoConstants.kvVoltSecondsPerInch, AutoConstants.kaVoltSecondsSquaredPerInch);
+    wheelSpeeds = new DifferentialDriveWheelSpeeds();
 
-    m_drive = new DifferentialDrive(leftFalcon1, rightFalcon1);
-    m_drive.setDeadband(0.05);
+    // only need P
+    leftPIDController = new PIDController(AutoConstants.kPDriveVel, 0.0, 0.0);
+    rightPIDController = new PIDController(AutoConstants.kPDriveVel, 0.0, 0.0);
+
+
+    drive = new DifferentialDrive(leftMotors, rightMotors);
+    drive.setDeadband(0.05);
 
     leftFalcon1.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, 0);
     rightFalcon1.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, 0, 0);
     leftFalcon1.setNeutralMode(NeutralMode.Brake);
     rightFalcon1.setNeutralMode(NeutralMode.Brake);
     resetEncoders();
-  
-    gyro = new PigeonIMU(DriveConstants.GYRO_ID);
 
     driveMode = DriveMode.CHEEZY;
   }
 
   @Override
   public void periodic(){
-    // System.out.println(getAngle());
+    wheelSpeeds.leftMetersPerSecond = getMetersPerSecondFromEncoder(leftFalcon1.getSelectedSensorVelocity()); 
+    wheelSpeeds.rightMetersPerSecond = getMetersPerSecondFromEncoder(rightFalcon1.getSelectedSensorVelocity()); 
+    // update pose using gyro and encoder values
+    pose = odometry.update(getHeading(), wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
   }
 
   public void tankDrive(double leftpower, double rightpower) {
-    m_drive.tankDrive(leftpower, rightpower);
+    drive.tankDrive(leftpower, rightpower);
+  }
+
+  public void tankDriveVolts(double leftVolts, double rightVolts){
+    // might have to invert these if setInvert doesn't work
+    leftMotors.setVoltage(leftVolts);
+    rightMotors.setVoltage(rightVolts);
+    drive.feed();
   }
 
   public void cheezyDrive(double straight, double turn) {
-    m_drive.curvatureDrive(straight, -turn, false);
+    drive.curvatureDrive(straight, -turn, false);
   }
 
   public void arcadeDrive(double straight, double turn) {
-    m_drive.arcadeDrive(straight, -turn);
+    drive.arcadeDrive(straight, -turn);
   }
 
   public void stopDrive() {
@@ -90,7 +128,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public double getRightEncoder() {
-    return (- rightFalcon1.getSelectedSensorPosition() * (DriveConstants.DISTANCE_PER_PULSE) / (ShiftingGearSubsystem.getShifterPosition() == ShiftingGearSubsystem.ShiftStatus.HIGH ? DriveConstants.HIGH_GEAR_RATIO : DriveConstants.LOW_GEAR_RATIO));
+    return (-rightFalcon1.getSelectedSensorPosition() * (DriveConstants.DISTANCE_PER_PULSE) / (ShiftingGearSubsystem.getShifterPosition() == ShiftingGearSubsystem.ShiftStatus.HIGH ? DriveConstants.HIGH_GEAR_RATIO : DriveConstants.LOW_GEAR_RATIO));
   }
 
   public double getAverageEncoder(){
@@ -98,7 +136,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public void setMaxOutput(double maxOutput) {
-    m_drive.setMaxOutput(maxOutput);
+    drive.setMaxOutput(maxOutput);
   }
 
   public double getAngle(){
@@ -121,5 +159,49 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public void setDriveMode(DriveMode driveMode){
     this.driveMode = driveMode;
+  }
+
+  public DifferentialDriveWheelSpeeds getDifferentialDriveSpeeds(){
+    return wheelSpeeds;
+  }
+  
+  public PIDController getLeftPIDController(){
+    return leftPIDController;
+  }
+
+  public PIDController getRightPIDController(){
+    return rightPIDController;
+  }
+
+  public SimpleMotorFeedforward getFeedforward(){
+    return feedforward;
+  }
+
+  public void resetOdometry(Pose2d pose){
+    resetEncoders();
+    odometry.resetPosition(pose, getHeading());
+  }
+
+  public Pose2d getPose(){
+    return odometry.getPoseMeters();
+  }
+
+  /*
+    takes raw falcon encoder value per 100ms and returns meters per second
+    of the drivetrain wheels
+    10.0 = 100 ms to 1s
+    2.0 * PI * r = circumference of the wheel; rotations -> meters traveled
+    2048.0 = CPR of falcon encoders
+  */
+  private double getMetersPerSecondFromEncoder(double raw){
+    double ratio = (ShiftingGearSubsystem.getShifterPosition() == ShiftingGearSubsystem.ShiftStatus.HIGH ? DriveConstants.HIGH_GEAR_RATIO : DriveConstants.LOW_GEAR_RATIO);
+    return (10.0 * raw * 2.0 * Math.PI * Units.inchesToMeters(DriveConstants.WHEEL_RADIUS)) / (2048.0 * ratio);
+  }
+
+  private Rotation2d getHeading(){
+    // negative applied because gyro (presumably) returns positive degrees 
+    // as the gyro turns ccw; we want the opposite, as the opposite is true 
+    // in math / on the unit circle
+    return Rotation2d.fromDegrees(-getAngle()); 
   }
 }

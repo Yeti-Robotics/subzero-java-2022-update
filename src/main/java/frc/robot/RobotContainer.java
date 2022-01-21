@@ -45,7 +45,20 @@ import frc.robot.commands.turret.TurnToTargetPIDCommand;
 import frc.robot.commands.turret.TurretTestCommand;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.RamseteController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.Constants.AutoConstants;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.TurretConstants;
@@ -56,6 +69,7 @@ import frc.robot.utils.XboxTrigger;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -159,19 +173,19 @@ public class RobotContainer {
             // rightTrigger = new XboxTrigger(xboxController, Hand.kRight);
             // leftTrigger = new XboxTrigger(xboxController, Hand.kLeft);
 
-            setXboxButtonWhenPressed(xboxController, Button.kLeftStick, new ToggleShiftingCommand(shiftingGearSubsystem, drivetrainSubsystem));
-            setXboxButtonWhenPressed(xboxController, Button.kRightStick, new ToggleIntakePistonCommand(intakeSubsystem));
+            // setXboxButtonWhenPressed(xboxController, Button.kLeftStick, new ToggleShiftingCommand(shiftingGearSubsystem, drivetrainSubsystem));
+            // setXboxButtonWhenPressed(xboxController, Button.kRightStick, new ToggleIntakePistonCommand(intakeSubsystem));
             
-            // setXboxTriggerWhileHeld(Hand.kRight, new AllInCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
-            // setXboxTriggerWhileHeld(Hand.kLeft, new IntakeInCommand(intakeSubsystem));
+            // // setXboxTriggerWhileHeld(Hand.kRight, new AllInCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
+            // // setXboxTriggerWhileHeld(Hand.kLeft, new IntakeInCommand(intakeSubsystem));
             
-            setXboxButtonWhileHeld(xboxController, Button.kLeftBumper, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED));//left
-            setXboxButtonWhileHeld(xboxController, Button.kRightBumper, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
+            // setXboxButtonWhileHeld(xboxController, Button.kLeftBumper, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED));//left
+            // setXboxButtonWhileHeld(xboxController, Button.kRightBumper, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
             
-            setXboxButtonWhenPressed(xboxController, Button.kA, new TurnToTargetPIDCommand(turretSubsystem));
-            setXboxButtonWhenPressed(xboxController, Button.kB, new ToggleShooterCommand(shooterSubsystem));
-            setXboxButtonWhileHeld(xboxController, Button.kY, new TestHoodCommand(hoodSubsystem, HoodConstants.HOOD_SPEED));// up
-            setXboxButtonWhileHeld(xboxController, Button.kX, new TestHoodCommand(hoodSubsystem, -HoodConstants.HOOD_SPEED));// down
+            // setXboxButtonWhenPressed(xboxController, Button.kA, new TurnToTargetPIDCommand(turretSubsystem));
+            // setXboxButtonWhenPressed(xboxController, Button.kB, new ToggleShooterCommand(shooterSubsystem));
+            // setXboxButtonWhileHeld(xboxController, Button.kY, new TestHoodCommand(hoodSubsystem, HoodConstants.HOOD_SPEED));// up
+            // setXboxButtonWhileHeld(xboxController, Button.kX, new TestHoodCommand(hoodSubsystem, -HoodConstants.HOOD_SPEED));// down
         }
     }
 
@@ -206,13 +220,13 @@ public class RobotContainer {
     }
 
     // Xbox controller equivalents
-    private void setXboxButtonWhenPressed(XboxController xboxController, XboxController.Button button, CommandBase command) {
-        new JoystickButton(xboxController, button.value).whenPressed(command);
-    }
+    // private void setXboxButtonWhenPressed(XboxController xboxController, XboxController.Button button, CommandBase command) {
+    //     new JoystickButton(xboxController, button.value).whenPressed(command);
+    // }
 
-    private void setXboxButtonWhileHeld(XboxController xboxController, XboxController.Button button, CommandBase command) {
-        new JoystickButton(xboxController, button.value).whileHeld(command);
-    }
+    // private void setXboxButtonWhileHeld(XboxController xboxController, XboxController.Button button, CommandBase command) {
+    //     new JoystickButton(xboxController, button.value).whileHeld(command);
+    // }
 
     // private void setXboxTriggerWhenPressed(Hand triggerSide, CommandBase command){
     //     if(triggerSide == Hand.kLeft){ 
@@ -242,11 +256,74 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        Command command = new PlayRecordingCommand("1616845434755recording.txt", drivetrainSubsystem);
-        return command;
+        var autoVoltageConstraint =
+            new DifferentialDriveVoltageConstraint(
+                new SimpleMotorFeedforward(
+                    AutoConstants.ksVolts,
+                    AutoConstants.kvVoltSecondsPerInch,
+                    AutoConstants.kaVoltSecondsSquaredPerInch
+                ),
+            AutoConstants.kinematics,
+            10);
+
+        // Create config for trajectory
+        TrajectoryConfig config = new TrajectoryConfig(
+            Units.inchesToMeters(DriveConstants.MAX_SPEED_INCHES_PER_SEC),
+            Units.inchesToMeters(DriveConstants.MAX_ACCEL_INCHES_PER_SEC2))
+            // Add kinematics to ensure max speed is actually obeyed
+            .setKinematics(AutoConstants.kinematics)
+            // Apply the voltage constraint
+            .addConstraint(autoVoltageConstraint);
+
+            // An example trajectory to follow.  All units in meters.
+            Trajectory exampleTrajectory =
+                TrajectoryGenerator.generateTrajectory(
+                    // Start at the origin facing the +X direction
+                    new Pose2d(0, 0, new Rotation2d(0)),
+                    // Pass through these two interior waypoints, making an 's' curve path
+                    List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+                    // End 3 meters straight ahead of where we started, facing forward
+                    new Pose2d(3, 0, new Rotation2d(0)),
+                    // Pass config
+                    config);
+
+            // Trajectory exampleTrajectory = 
+            //     TrajectoryGenerator.generateTrajectory(
+            //         List.of(
+            //             new Pose2d(0, 0, new Rotation2d(0)), 
+            //             new Pose2d(12, 0, new Rotation2d(0))
+            //         ),
+            //         config);
+
+            RamseteCommand ramseteCommand =     
+                new RamseteCommand(
+                    exampleTrajectory,
+                    drivetrainSubsystem::getPose,
+                    new RamseteController(AutoConstants.kRamseteB, AutoConstants.kRamseteZeta),
+                    new SimpleMotorFeedforward(
+                        AutoConstants.ksVolts,
+                        AutoConstants.kvVoltSecondsPerInch,
+                        AutoConstants.kaVoltSecondsSquaredPerInch
+                    ),
+                    AutoConstants.kinematics,
+                    drivetrainSubsystem::getDifferentialDriveSpeeds,
+                    new PIDController(AutoConstants.kPDriveVel, 0, 0),
+                    new PIDController(AutoConstants.kPDriveVel, 0, 0),
+                    // RamseteCommand passes volts to the callback
+                    drivetrainSubsystem::tankDriveVolts,
+                    drivetrainSubsystem
+                );
+
+        // Reset odometry to the starting pose of the trajectory.
+        drivetrainSubsystem.resetOdometry(exampleTrajectory.getInitialPose());
+
+        // Run path following command, then stop at the end.
+        return ramseteCommand.andThen(() -> drivetrainSubsystem.tankDriveVolts(0, 0));
     }
 
-    public boolean getButtonStatus(Joystick joystick, int button) {
-        return driverStationJoystick.getRawButton(button);
-    }
+    // RamseteCommand(Trajectory, Supplier<Pose2d>, RamseteController, SimpleMotorFeedforward, DifferentialDriveKinematics, drivetrainSubsystem::getWheelSpeeds, PIDController, PIDController, drivetrainSubsystem::tankDriveVolts, DrivetrainSubsystem) is undefined
+
+    // public boolean getButtonStatus(Joystick joystick, int button) {
+    //     return driverStationJoystick.getRawButton(button);
+    // }
 }

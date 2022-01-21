@@ -91,7 +91,7 @@ public class Robot extends TimedRobot {
     // System.out.println("hood angle: " + m_robotContainer.hoodSubsystem.hoodAngleFromEncoder(m_robotContainer.hoodSubsystem.getEncoder()));
     
     // m_robotContainer.updateIsDriverStation();
-    System.out.println("isDriverStation: " + m_robotContainer.isDriverStation);
+    // System.out.println("isDriverStation: " + m_robotContainer.isDriverStation);
 
     CommandScheduler.getInstance().run();
   }
