@@ -29,8 +29,8 @@ public final class Constants {
     public static final double WHEEL_RADIUS = WHEEL_DIAMETER / 2.0;
 
     public static final double HIGH_GEAR_RATIO = 6.86; //jvn  //5.533243;// fudge values
-    public static final double LOW_GEAR_RATIO = 9.93;//jvn // fudge values 
-    public static final double DISTANCE_PER_PULSE = (WHEEL_DIAMETER * Math.PI ) / 2048; //wheel diam in inches & falcon CPR
+    public static final double LOW_GEAR_RATIO = 15.8839779006; //fudge value //9.93;//jvn // fudge values 
+    public static final double DISTANCE_PER_PULSE = (WHEEL_DIAMETER * Math.PI) / 2048; //wheel diam in inches & falcon CPR
     
     public static final int[] SHIFTER_SOLENOID = {1,6}; 
     public static final int GYRO_ID = 13;
@@ -41,14 +41,14 @@ public final class Constants {
 
   public static final class AutoConstants {
     //The KS Value on Sysid
-    public static final double ksVolts = 0.65952;
+    public static final double ksVolts = 0.580784; //0.65952
     //The Kv Value on Sysid
-    public static final double kvVoltSecondsPerInch = 0.089694;
+    public static final double kvVoltSecondsPerMeters = 5.7048; //0.089694
     //The Ka Value on Sysid
-    public static final double kaVoltSecondsSquaredPerInch = 0.0054003;
+    public static final double kaVoltSecondsSquaredPerMeter = 0.29626; //0.0054003
 
     //The Kp Value on Sysid
-    public static final double kPDriveVel = 0.2266;
+    public static final double kPDriveVel = 5.4511; //0.2266
 
     public static final double kTrackWidthInches = 21.5;
     public static final double trackWidthMeters = 0.5461;
@@ -57,7 +57,7 @@ public final class Constants {
     // for the left & right sides of the drivetrain
     public static final DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(trackWidthMeters);
 
-    // Reasonable baseline values for a RAMSETE follower in units of Inches and seconds - Might have to retouch if there is error
+    // Reasonable baseline values for a RAMSETE follower in units of meters and seconds - Might have to retouch if there is error
     public static final double kRamseteB = 2.0; //78.7402;
     public static final double kRamseteZeta = 0.7;
 

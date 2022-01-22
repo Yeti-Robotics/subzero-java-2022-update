@@ -122,10 +122,10 @@ public class RobotContainer {
         
         // switch (drivetrainSubsystem.getDriveMode()) {
         //     case TANK:
-            drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.tankDrive(getLeftY(), getRightY()), drivetrainSubsystem));
+           drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.tankDrive(getLeftY(), getRightY()), drivetrainSubsystem));
         //     break;
         //     case CHEEZY:
-        //     drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.cheezyDrive(getLeftY(), getRightX()), drivetrainSubsystem));
+            // drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.cheezyDrive(getLeftY(), getRightX()), drivetrainSubsystem));
         //     break;
         //     case ARCADE:
         //     drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.arcadeDrive(getLeftY(), getRightX()), drivetrainSubsystem));
@@ -260,11 +260,11 @@ public class RobotContainer {
             new DifferentialDriveVoltageConstraint(
                 new SimpleMotorFeedforward(
                     AutoConstants.ksVolts,
-                    AutoConstants.kvVoltSecondsPerInch,
-                    AutoConstants.kaVoltSecondsSquaredPerInch
+                    AutoConstants.kvVoltSecondsPerMeters,
+                    AutoConstants.kaVoltSecondsSquaredPerMeter
                 ),
             AutoConstants.kinematics,
-            10);
+            10.5);
 
         // Create config for trajectory
         TrajectoryConfig config = new TrajectoryConfig(
@@ -276,24 +276,35 @@ public class RobotContainer {
             .addConstraint(autoVoltageConstraint);
 
             // An example trajectory to follow.  All units in meters.
-            Trajectory exampleTrajectory =
-                TrajectoryGenerator.generateTrajectory(
-                    // Start at the origin facing the +X direction
-                    new Pose2d(0, 0, new Rotation2d(0)),
-                    // Pass through these two interior waypoints, making an 's' curve path
-                    List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-                    // End 3 meters straight ahead of where we started, facing forward
-                    new Pose2d(3, 0, new Rotation2d(0)),
-                    // Pass config
-                    config);
+            // Trajectory exampleTrajectory =
+            //     TrajectoryGenerator.generateTrajectory(
+            //         // Start at the origin facing the +X direction
+            //         new Pose2d(0, 0, new Rotation2d(0)),
+            //         // Pass through these two interior waypoints, making an 's' curve path
+            //         List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+            //         // End 3 meters straight ahead of where we started, facing forward
+            //         new Pose2d(3, 0, new Rotation2d(0)),
+            //         // Pass config
+            //         config);
 
             // Trajectory exampleTrajectory = 
             //     TrajectoryGenerator.generateTrajectory(
             //         List.of(
             //             new Pose2d(0, 0, new Rotation2d(0)), 
-            //             new Pose2d(12, 0, new Rotation2d(0))
+            //             new Pose2d(1, 0, new Rotation2d(0))
             //         ),
             //         config);
+
+            Trajectory exampleTrajectory =
+                TrajectoryGenerator.generateTrajectory(
+                    // Start at the origin facing the +X direction
+                    new Pose2d(0, 0, new Rotation2d(0)),
+                    // Curve right and then left
+                    List.of(new Translation2d(1, 1)),
+                    // End 2 meters straight ahead
+                    new Pose2d(2, 0, new Rotation2d(0)),
+                    // Pass config
+                    config);
 
             RamseteCommand ramseteCommand =     
                 new RamseteCommand(
@@ -302,8 +313,8 @@ public class RobotContainer {
                     new RamseteController(AutoConstants.kRamseteB, AutoConstants.kRamseteZeta),
                     new SimpleMotorFeedforward(
                         AutoConstants.ksVolts,
-                        AutoConstants.kvVoltSecondsPerInch,
-                        AutoConstants.kaVoltSecondsSquaredPerInch
+                        AutoConstants.kvVoltSecondsPerMeters,
+                        AutoConstants.kaVoltSecondsSquaredPerMeter
                     ),
                     AutoConstants.kinematics,
                     drivetrainSubsystem::getDifferentialDriveSpeeds,

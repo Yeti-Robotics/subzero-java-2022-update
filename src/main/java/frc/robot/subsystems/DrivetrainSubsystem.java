@@ -66,7 +66,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     gyro = new PigeonIMU(DriveConstants.GYRO_ID);
 
     odometry = new DifferentialDriveOdometry(getHeading());
-    feedforward = new SimpleMotorFeedforward(AutoConstants.ksVolts, AutoConstants.kvVoltSecondsPerInch, AutoConstants.kaVoltSecondsSquaredPerInch);
+    feedforward = new SimpleMotorFeedforward(AutoConstants.ksVolts, AutoConstants.kvVoltSecondsPerMeters, AutoConstants.kaVoltSecondsSquaredPerMeter);
     wheelSpeeds = new DifferentialDriveWheelSpeeds();
 
     // only need P
@@ -92,6 +92,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     wheelSpeeds.rightMetersPerSecond = getMetersPerSecondFromEncoder(rightFalcon1.getSelectedSensorVelocity()); 
     // update pose using gyro and encoder values
     pose = odometry.update(getHeading(), wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
+    System.out.println("pose: " + pose);
   }
 
   public void tankDrive(double leftpower, double rightpower) {
@@ -124,7 +125,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public double getLeftEncoder() {
-    return (leftFalcon1.getSelectedSensorPosition() * (DriveConstants.DISTANCE_PER_PULSE)  / (ShiftingGearSubsystem.getShifterPosition() == ShiftingGearSubsystem.ShiftStatus.HIGH ? DriveConstants.HIGH_GEAR_RATIO : DriveConstants.LOW_GEAR_RATIO));
+    return (leftFalcon1.getSelectedSensorPosition() * (DriveConstants.DISTANCE_PER_PULSE) / (ShiftingGearSubsystem.getShifterPosition() == ShiftingGearSubsystem.ShiftStatus.HIGH ? DriveConstants.HIGH_GEAR_RATIO : DriveConstants.LOW_GEAR_RATIO));
   }
 
   public double getRightEncoder() {
