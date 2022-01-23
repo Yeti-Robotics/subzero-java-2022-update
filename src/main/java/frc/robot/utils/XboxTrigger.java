@@ -10,18 +10,21 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OIConstants;
 
 public class XboxTrigger extends Trigger {
-    // private XboxController xboxController; 
-    // private Hand triggerSide; 
+    public static enum Hand {
+        LEFT, RIGHT;
+    }
 
-    // public XboxTrigger(XboxController xboxController, Hand triggerSide){
-    //     this.xboxController = xboxController; 
-    //     this.triggerSide = triggerSide;
-    //     GenericHID.Hand
-    // }
+    private XboxController xboxController;
+    private Hand hand;
 
-    // @Override
-    // public boolean get(){
-    //     double raw = xboxController.getTriggerAxis(triggerSide);
-    //     return raw >= OIConstants.TRIGGER_THRESHOLD;
-    // }
+    public XboxTrigger(XboxController xboxController, Hand hand){
+        this.hand = hand;
+        this.xboxController = xboxController; 
+    }
+
+    @Override
+    public boolean get(){
+        double raw = (hand == Hand.LEFT) ? xboxController.getLeftTriggerAxis() : xboxController.getRightTriggerAxis();
+        return raw >= OIConstants.TRIGGER_THRESHOLD;
+    }
 }

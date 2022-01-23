@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.ctre.phoenix.sensors.PigeonIMU;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -20,13 +21,15 @@ public class IntakeSubsystem extends SubsystemBase {
   public static IntakeStatus intakeStatus;
 
   private final DoubleSolenoid intakePistons;
-  private final VictorSPX intakeVictor;
+  private final TalonSRX intakeTalon;
+  private final PigeonIMU intakePigeon;
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
-    intakeVictor = new VictorSPX(IntakeConstants.INTAKE_VICTOR);
+    intakeTalon = new TalonSRX(IntakeConstants.INTAKE_TALON);
     intakePistons = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, IntakeConstants.INTAKE_PISTONS_SOLENOID[0], IntakeConstants.INTAKE_PISTONS_SOLENOID[1]);
+    intakePigeon = new PigeonIMU(intakeTalon);
 
-    intakeVictor.setInverted(true);
+    intakeTalon.setInverted(true);
     intakeStatus = IntakeStatus.DOWN;
   }
 
@@ -45,19 +48,29 @@ public class IntakeSubsystem extends SubsystemBase {
   }
   
   public void intakeIn(){
-      intakeVictor.set(ControlMode.PercentOutput, IntakeConstants.ROLL_IN_SPEED);
+      intakeTalon.set(ControlMode.PercentOutput, IntakeConstants.ROLL_IN_SPEED);
   }
   public void intakeOut(){
-      intakeVictor.set(ControlMode.PercentOutput, IntakeConstants.ROLL_OUT_SPEED);
+      intakeTalon.set(ControlMode.PercentOutput, IntakeConstants.ROLL_OUT_SPEED);
   }
   public void intakeStop(){
-      intakeVictor.set(ControlMode.PercentOutput, 0);
+      intakeTalon.set(ControlMode.PercentOutput, 0);
   }
   public IntakeStatus getIntakePosition(){
       return intakeStatus;
   }
 
-  public VictorSPX getIntakeVictor(){
-    return intakeVictor;
+  public TalonSRX getIntakeVictor(){
+    return intakeTalon;
+  }
+
+  public double getAngle(){
+    double [] ypr = new double[3];
+    intakePigeon.getYawPitchRoll(ypr);
+    return ypr[0];
+  }
+
+  public void resetGyro(){
+    intakePigeon.setYaw(0);
   }
 }

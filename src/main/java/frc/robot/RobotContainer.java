@@ -29,6 +29,7 @@ import frc.robot.commands.hood.SetCalcHoodAngleCommand;
 import frc.robot.commands.hood.TestHoodCommand;
 import frc.robot.commands.hopper.HopperInCommand;
 import frc.robot.commands.intake.IntakeInCommand;
+import frc.robot.commands.intake.IntakeOutCommand;
 import frc.robot.commands.intake.ToggleIntakePistonCommand;
 import frc.robot.commands.pinchroller.PinchRollerInCommand;
 import frc.robot.commands.replay.InitiateRecordingCommand;
@@ -52,10 +53,14 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.DrivetrainSubsystem.DriveMode;
 import frc.robot.utils.Limelight;
+import frc.robot.utils.XboxDPad;
 import frc.robot.utils.XboxTrigger;
+import frc.robot.utils.XboxDPad.Direction;
+import frc.robot.utils.XboxTrigger.Hand;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import java.util.HashMap;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -91,8 +96,7 @@ public class RobotContainer {
     public RobotContainer() {
         commandScheduler = CommandScheduler.getInstance();
         
-        // isDriverStation = !DriverStation.getJoystickIsXbox(OIConstants.XBOX_PORT); 
-        isDriverStation = true;
+        isDriverStation = !(DriverStation.getJoystickIsXbox(0) || DriverStation.getJoystickIsXbox(1)); 
 
         shooterSubsystem = new ShooterSubsystem();
         intakeSubsystem = new IntakeSubsystem();
@@ -106,16 +110,17 @@ public class RobotContainer {
         shiftingGearSubsystem = new ShiftingGearSubsystem();
         buttonMap = new HashMap<>();
         
-        // switch (drivetrainSubsystem.getDriveMode()) {
-        //     case TANK:
-            drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.tankDrive(getLeftY(), getRightY()), drivetrainSubsystem));
-        //     break;
-        //     case CHEEZY:
-        //     drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.cheezyDrive(getLeftY(), getRightX()), drivetrainSubsystem));
-        //     break;
-        //     case ARCADE:
-        //     drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.arcadeDrive(getLeftY(), getRightX()), drivetrainSubsystem));
-        // }
+        switch (drivetrainSubsystem.getDriveMode()) {
+            case TANK:
+                drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.tankDrive(getLeftY(), getRightY()), drivetrainSubsystem));
+                break;
+            case CHEEZY:
+                drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.cheezyDrive(getLeftY(), getRightX()), drivetrainSubsystem));
+                break;
+            case ARCADE:
+                drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.arcadeDrive(getLeftY(), getRightX()), drivetrainSubsystem));
+                break;
+        }
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -155,18 +160,21 @@ public class RobotContainer {
                 Allowed buttons:
                 kA, kB, kBack, kBumperLeft, kBumperRight, kStart, kStickLeft, kStickRight, kX, kY (and triggers)
             */
-            xboxController = new XboxController(OIConstants.XBOX_PORT); 
-            // rightTrigger = new XboxTrigger(xboxController, Hand.kRight);
-            // leftTrigger = new XboxTrigger(xboxController, Hand.kLeft);
+            int port = (DriverStation.getJoystickIsXbox(0)) ? 0 : 1;
+            xboxController = new XboxController(port); 
+            rightTrigger = new XboxTrigger(xboxController, Hand.RIGHT);
+            leftTrigger = new XboxTrigger(xboxController, Hand.LEFT);
 
             setXboxButtonWhenPressed(xboxController, Button.kLeftStick, new ToggleShiftingCommand(shiftingGearSubsystem, drivetrainSubsystem));
             setXboxButtonWhenPressed(xboxController, Button.kRightStick, new ToggleIntakePistonCommand(intakeSubsystem));
             
-            // setXboxTriggerWhileHeld(Hand.kRight, new AllInCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
-            // setXboxTriggerWhileHeld(Hand.kLeft, new IntakeInCommand(intakeSubsystem));
+            setXboxTriggerWhileHeld(Hand.RIGHT, new AllInCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
+            setXboxButtonWhileHeld(xboxController, Button.kRightBumper, new IntakeInCommand(intakeSubsystem));
+            setXboxTriggerWhileHeld(Hand.LEFT, new AllOutCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
+            setXboxButtonWhileHeld(xboxController, Button.kLeftBumper, new IntakeOutCommand(intakeSubsystem));
             
-            setXboxButtonWhileHeld(xboxController, Button.kLeftBumper, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED));//left
-            setXboxButtonWhileHeld(xboxController, Button.kRightBumper, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
+            setXboxDPadWhileHeld(Direction.LEFT, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED));//left
+            setXboxDPadWhileHeld(Direction.RIGHT, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
             
             setXboxButtonWhenPressed(xboxController, Button.kA, new TurnToTargetPIDCommand(turretSubsystem));
             setXboxButtonWhenPressed(xboxController, Button.kB, new ToggleShooterCommand(shooterSubsystem));
@@ -214,25 +222,33 @@ public class RobotContainer {
         new JoystickButton(xboxController, button.value).whileHeld(command);
     }
 
-    // private void setXboxTriggerWhenPressed(Hand triggerSide, CommandBase command){
-    //     if(triggerSide == Hand.kLeft){ 
-    //         leftTrigger.whenActive(command);
-    //     } else {
-    //         rightTrigger.whenActive(command);
-    //     }
-    // }
+    private void setXboxTriggerWhenPressed(Hand triggerSide, CommandBase command){
+        if(triggerSide == Hand.LEFT){ 
+            leftTrigger.whenActive(command);
+        } else {
+            rightTrigger.whenActive(command);
+        }
+    }
 
-    // private void setXboxTriggerWhileHeld(Hand triggerSide, CommandBase command){
-    //     if(triggerSide == Hand.kLeft){ 
-    //         leftTrigger.whileActiveContinuous(command);
-    //     } else {
-    //         rightTrigger.whileActiveContinuous(command);
-    //     }
-    // }
+    private void setXboxTriggerWhileHeld(Hand triggerSide, CommandBase command){
+        if(triggerSide == Hand.LEFT){ 
+            leftTrigger.whileActiveContinuous(command);
+        } else {
+            rightTrigger.whileActiveContinuous(command);
+        }
+    }
+
+    private void setXboxDPadWhenPressed(Direction direction, CommandBase command) {
+        new XboxDPad(xboxController, direction).whenPressed(command);
+    }
+
+    private void setXboxDPadWhileHeld(Direction direction, CommandBase command) {
+        new XboxDPad(xboxController, direction).whileHeld(command);
+    }
 
     public void updateIsDriverStation(){
         boolean prev = isDriverStation;
-        isDriverStation = DriverStation.getJoystickIsXbox(OIConstants.XBOX_PORT);
+        isDriverStation = !(DriverStation.getJoystickIsXbox(0) || DriverStation.getJoystickIsXbox(1));
         if (prev == isDriverStation) {
             return;
         } else {

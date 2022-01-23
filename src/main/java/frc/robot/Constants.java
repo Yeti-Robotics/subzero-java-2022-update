@@ -54,7 +54,6 @@ public final class Constants {
     public static final int LEFT_JOYSTICK = 0;
     public static final int SECONDARY_JOYSTICK = 2;
     public static final int DRIVER_STATION_JOY = 0;
-    public static final int XBOX_PORT = 1; 
     public static final double TRIGGER_THRESHOLD = 0.75;
   }
 
@@ -64,7 +63,7 @@ public final class Constants {
   }
 
   public static final class IntakeConstants{
-    public static final int INTAKE_VICTOR = 8;
+    public static final int INTAKE_TALON = 10;
     public static final int[] INTAKE_PISTONS_SOLENOID = {0, 7};
     public static final double ROLL_IN_SPEED = 1.0;
     public static final double ROLL_OUT_SPEED = -1.0;
