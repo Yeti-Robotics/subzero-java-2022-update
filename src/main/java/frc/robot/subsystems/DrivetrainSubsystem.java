@@ -92,7 +92,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     wheelSpeeds.rightMetersPerSecond = getMetersPerSecondFromEncoder(rightFalcon1.getSelectedSensorVelocity()); 
     // update pose using gyro and encoder values
     pose = odometry.update(getHeading(), wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
-    System.out.println("pose: " + pose);
+  //   System.out.println("pose: " + pose);//
+  //  System.out.println("gyro: "+ getHeading());
+  //  System.out.println("wheel speeds: " + wheelSpeeds);
+  
   }
 
   public void tankDrive(double leftpower, double rightpower) {

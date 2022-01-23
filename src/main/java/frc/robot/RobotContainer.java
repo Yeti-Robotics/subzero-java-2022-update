@@ -54,9 +54,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.HoodConstants;
@@ -68,8 +70,12 @@ import frc.robot.utils.Limelight;
 import frc.robot.utils.XboxTrigger;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
+
+import com.pathplanner.lib.PathPlanner;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -266,6 +272,7 @@ public class RobotContainer {
             AutoConstants.kinematics,
             10.5);
 
+        
         // Create config for trajectory
         TrajectoryConfig config = new TrajectoryConfig(
             Units.inchesToMeters(DriveConstants.MAX_SPEED_INCHES_PER_SEC),
@@ -295,7 +302,7 @@ public class RobotContainer {
             //         ),
             //         config);
 
-            Trajectory exampleTrajectory =
+          /*  Trajectory exampleTrajectory =
                 TrajectoryGenerator.generateTrajectory(
                     // Start at the origin facing the +X direction
                     new Pose2d(0, 0, new Rotation2d(0)),
@@ -304,11 +311,13 @@ public class RobotContainer {
                     // End 2 meters straight ahead
                     new Pose2d(2, 0, new Rotation2d(0)),
                     // Pass config
-                    config);
+                    config); */
+
+            Trajectory customTrajectory = customTrajectory();
 
             RamseteCommand ramseteCommand =     
                 new RamseteCommand(
-                    exampleTrajectory,
+                    customTrajectory,
                     drivetrainSubsystem::getPose,
                     new RamseteController(AutoConstants.kRamseteB, AutoConstants.kRamseteZeta),
                     new SimpleMotorFeedforward(
@@ -326,10 +335,25 @@ public class RobotContainer {
                 );
 
         // Reset odometry to the starting pose of the trajectory.
-        drivetrainSubsystem.resetOdometry(exampleTrajectory.getInitialPose());
+        drivetrainSubsystem.resetOdometry(customTrajectory.getInitialPose());
 
         // Run path following command, then stop at the end.
         return ramseteCommand.andThen(() -> drivetrainSubsystem.tankDriveVolts(0, 0));
+    }
+
+    public Trajectory customTrajectory(){
+        String trajectoryJSON = "paths/defaultpath.wpilib.json";
+        Trajectory trajectory;
+        // Trajectory trajectory = new Trajectory();
+        System.out.println("PathWeaverTest initialized");
+        try {
+          Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
+          trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+          return trajectory;
+        } catch (IOException ex) {
+          DriverStation.reportError("Unable to open trajectory: " + trajectoryJSON, ex.getStackTrace());
+          return null;
+        }
     }
 
     // RamseteCommand(Trajectory, Supplier<Pose2d>, RamseteController, SimpleMotorFeedforward, DifferentialDriveKinematics, drivetrainSubsystem::getWheelSpeeds, PIDController, PIDController, drivetrainSubsystem::tankDriveVolts, DrivetrainSubsystem) is undefined

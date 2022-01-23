@@ -136,6 +136,7 @@ public class Robot extends TimedRobot {
     // this line or comment it out.
     m_robotContainer.drivetrainSubsystem.resetEncoders();
     m_robotContainer.drivetrainSubsystem.resetGyro();
+    m_robotContainer.intakeSubsystem.resetGyro();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
