@@ -44,6 +44,8 @@ import frc.robot.commands.turret.CalibrateTurretCommand;
 import frc.robot.commands.turret.TurnToAnglePIDCommand;
 import frc.robot.commands.turret.TurnToTargetPIDCommand;
 import frc.robot.commands.turret.TurretTestCommand;
+import frc.robot.commands.xbox.XboxRumbleCommand;
+import frc.robot.commands.xbox.XboxToggleRumbleCommand;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -89,6 +91,8 @@ public class RobotContainer {
     public LEDSubsystem ledSubsystem;
     public ShiftingGearSubsystem shiftingGearSubsystem;
     private HashMap<Integer, CommandBase> buttonMap;
+
+    public static boolean isRumbling = false; // for xbox
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -160,13 +164,16 @@ public class RobotContainer {
                 Allowed buttons:
                 kA, kB, kBack, kBumperLeft, kBumperRight, kStart, kStickLeft, kStickRight, kX, kY (and triggers)
             */
+
             int port = (DriverStation.getJoystickIsXbox(0)) ? 0 : 1;
             xboxController = new XboxController(port); 
+            new XboxRumbleCommand(xboxController, OIConstants.XBOX_RUMBLE_INTENSITY).schedule();
+
             rightTrigger = new XboxTrigger(xboxController, Hand.RIGHT);
             leftTrigger = new XboxTrigger(xboxController, Hand.LEFT);
 
-            setXboxButtonWhenPressed(xboxController, Button.kLeftStick, new ToggleShiftingCommand(shiftingGearSubsystem, drivetrainSubsystem));
-            setXboxButtonWhenPressed(xboxController, Button.kRightStick, new ToggleIntakePistonCommand(intakeSubsystem));
+            setXboxButtonWhenPressed(xboxController, Button.kLeftStick, new ToggleShiftingCommand(shiftingGearSubsystem, drivetrainSubsystem), false);
+            setXboxButtonWhenPressed(xboxController, Button.kRightStick, new ToggleIntakePistonCommand(intakeSubsystem), false);
             
             setXboxTriggerWhileHeld(Hand.RIGHT, new AllInCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
             setXboxButtonWhileHeld(xboxController, Button.kRightBumper, new IntakeInCommand(intakeSubsystem));
@@ -176,8 +183,8 @@ public class RobotContainer {
             setXboxDPadWhileHeld(Direction.LEFT, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED));//left
             setXboxDPadWhileHeld(Direction.RIGHT, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
             
-            setXboxButtonWhenPressed(xboxController, Button.kA, new TurnToTargetPIDCommand(turretSubsystem));
-            setXboxButtonWhenPressed(xboxController, Button.kB, new ToggleShooterCommand(shooterSubsystem));
+            setXboxButtonWhenPressed(xboxController, Button.kA, new TurnToTargetPIDCommand(turretSubsystem), false);
+            setXboxButtonWhenPressed(xboxController, Button.kB, new ToggleShooterCommand(shooterSubsystem), true);
             setXboxButtonWhileHeld(xboxController, Button.kY, new TestHoodCommand(hoodSubsystem, HoodConstants.HOOD_SPEED));// up
             setXboxButtonWhileHeld(xboxController, Button.kX, new TestHoodCommand(hoodSubsystem, -HoodConstants.HOOD_SPEED));// down
         }
@@ -214,7 +221,10 @@ public class RobotContainer {
     }
 
     // Xbox controller equivalents
-    private void setXboxButtonWhenPressed(XboxController xboxController, XboxController.Button button, CommandBase command) {
+    private void setXboxButtonWhenPressed(XboxController xboxController, XboxController.Button button, CommandBase command, boolean withRumble) {
+        if(withRumble){
+            command = command.beforeStarting(new XboxToggleRumbleCommand());
+        }
         new JoystickButton(xboxController, button.value).whenPressed(command);
     }
 
@@ -264,5 +274,9 @@ public class RobotContainer {
 
     public boolean getButtonStatus(Joystick joystick, int button) {
         return driverStationJoystick.getRawButton(button);
+    }
+
+    public static void toggleIsRumble(){
+        isRumbling = !isRumbling;
     }
 }

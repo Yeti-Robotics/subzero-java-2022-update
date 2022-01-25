@@ -55,6 +55,7 @@ public final class Constants {
     public static final int SECONDARY_JOYSTICK = 2;
     public static final int DRIVER_STATION_JOY = 0;
     public static final double TRIGGER_THRESHOLD = 0.75;
+    public static final double XBOX_RUMBLE_INTENSITY = 1.0;
   }
 
   public static final class LEDConstants {
