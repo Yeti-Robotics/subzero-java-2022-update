@@ -21,15 +21,13 @@ public class IntakeSubsystem extends SubsystemBase {
   public static IntakeStatus intakeStatus;
 
   private final DoubleSolenoid intakePistons;
-  private final TalonSRX intakeTalon;
-  private final PigeonIMU intakePigeon;
+  private final VictorSPX intakeVictor;
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
-    intakeTalon = new TalonSRX(IntakeConstants.INTAKE_TALON);
+    intakeVictor = new VictorSPX(IntakeConstants.INTAKE_VICTOR);
     intakePistons = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, IntakeConstants.INTAKE_PISTONS_SOLENOID[0], IntakeConstants.INTAKE_PISTONS_SOLENOID[1]);
-    intakePigeon = new PigeonIMU(intakeTalon);
 
-    intakeTalon.setInverted(true);
+    intakeVictor.setInverted(true);
     intakeStatus = IntakeStatus.DOWN;
   }
 
@@ -48,29 +46,19 @@ public class IntakeSubsystem extends SubsystemBase {
   }
   
   public void intakeIn(){
-      intakeTalon.set(ControlMode.PercentOutput, IntakeConstants.ROLL_IN_SPEED);
+      intakeVictor.set(ControlMode.PercentOutput, IntakeConstants.ROLL_IN_SPEED);
   }
   public void intakeOut(){
-      intakeTalon.set(ControlMode.PercentOutput, IntakeConstants.ROLL_OUT_SPEED);
+      intakeVictor.set(ControlMode.PercentOutput, IntakeConstants.ROLL_OUT_SPEED);
   }
   public void intakeStop(){
-      intakeTalon.set(ControlMode.PercentOutput, 0);
+      intakeVictor.set(ControlMode.PercentOutput, 0);
   }
   public IntakeStatus getIntakePosition(){
       return intakeStatus;
   }
 
-  public TalonSRX getIntakeVictor(){
-    return intakeTalon;
-  }
-
-  public double getAngle(){
-    double [] ypr = new double[3];
-    intakePigeon.getYawPitchRoll(ypr);
-    return ypr[0];
-  }
-
-  public void resetGyro(){
-    intakePigeon.setYaw(0);
+  public VictorSPX getIntakeVictor(){
+    return intakeVictor;
   }
 }
