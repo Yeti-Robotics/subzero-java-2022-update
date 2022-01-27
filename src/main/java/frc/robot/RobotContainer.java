@@ -55,6 +55,7 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.DrivetrainSubsystem.DriveMode;
 import frc.robot.utils.Limelight;
+import frc.robot.utils.XController;
 import frc.robot.utils.XboxDPad;
 import frc.robot.utils.XboxTrigger;
 import frc.robot.utils.XboxDPad.Direction;
@@ -75,7 +76,7 @@ public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private CommandScheduler commandScheduler;
     public Joystick driverStationJoystick;
-    private XboxController xboxController; 
+    private XController xboxController; 
     private XboxTrigger rightTrigger; 
     private XboxTrigger leftTrigger;
     public boolean isDriverStation;
@@ -166,8 +167,8 @@ public class RobotContainer {
             */
 
             int port = (DriverStation.getJoystickIsXbox(0)) ? 0 : 1;
-            xboxController = new XboxController(port); 
-            new XboxRumbleCommand(xboxController, OIConstants.XBOX_RUMBLE_INTENSITY).schedule();
+            xboxController = new XController(port); 
+            new RunCommand(() -> new XboxRumbleCommand(xboxController, OIConstants.XBOX_RUMBLE_INTENSITY));
 
             rightTrigger = new XboxTrigger(xboxController, Hand.RIGHT);
             leftTrigger = new XboxTrigger(xboxController, Hand.LEFT);
@@ -175,13 +176,13 @@ public class RobotContainer {
             setXboxButtonWhenPressed(xboxController, Button.kLeftStick, new ToggleShiftingCommand(shiftingGearSubsystem, drivetrainSubsystem), false);
             setXboxButtonWhenPressed(xboxController, Button.kRightStick, new ToggleIntakePistonCommand(intakeSubsystem), false);
             
-            setXboxTriggerWhileHeld(Hand.RIGHT, new AllInCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
+            xboxController.setTriggerWhileHeld(Hand.RIGHT, new AllInCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
             setXboxButtonWhileHeld(xboxController, Button.kRightBumper, new IntakeInCommand(intakeSubsystem));
-            setXboxTriggerWhileHeld(Hand.LEFT, new AllOutCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
+            xboxController.setTriggerWhileHeld(Hand.LEFT, new AllOutCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
             setXboxButtonWhileHeld(xboxController, Button.kLeftBumper, new IntakeOutCommand(intakeSubsystem));
             
-            setXboxDPadWhileHeld(Direction.LEFT, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED));//left
-            setXboxDPadWhileHeld(Direction.RIGHT, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
+            xboxController.setDPadWhileHeld(Direction.LEFT, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED));//left
+            xboxController.setDPadWhileHeld(Direction.RIGHT, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
             
             setXboxButtonWhenPressed(xboxController, Button.kA, new TurnToTargetPIDCommand(turretSubsystem), false);
             setXboxButtonWhenPressed(xboxController, Button.kB, new ToggleShooterCommand(shooterSubsystem), true);
