@@ -1,7 +1,6 @@
 {
   "SysId": {
     "Analysis Type": "Drivetrain",
-    "AnalyzerJSONLocation": "C:\\Users\\mehta\\OneDrive\\Desktop\\sysid_data20220122-100417.json",
     "NetworkTables Settings": {
       "serverTeam": "3506"
     },

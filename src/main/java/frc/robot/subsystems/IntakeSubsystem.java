@@ -5,13 +5,10 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import com.ctre.phoenix.sensors.PigeonIMU;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
 
@@ -22,22 +19,20 @@ public class IntakeSubsystem extends SubsystemBase {
   public static IntakeStatus intakeStatus;
 
   private final DoubleSolenoid intakePistons;
-  private final TalonSRX intakeTalon;
-  private final PigeonIMU tempGyro;
+  private final VictorSPX intakeVictor;
+
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
-    intakeTalon = new TalonSRX(IntakeConstants.INTAKE_TALON);
+    intakeVictor = new VictorSPX(IntakeConstants.INTAKE_VICTOR);
     intakePistons = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, IntakeConstants.INTAKE_PISTONS_SOLENOID[0], IntakeConstants.INTAKE_PISTONS_SOLENOID[1]);
-    tempGyro = new PigeonIMU(intakeTalon);
 
-    intakeTalon.setInverted(true);
+    intakeVictor.setInverted(true);
     intakeStatus = IntakeStatus.DOWN;
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    System.out.println("Gyro : " + getAngle());
   }
 
   public void extend(){
@@ -50,29 +45,19 @@ public class IntakeSubsystem extends SubsystemBase {
   }
   
   public void intakeIn(){
-      intakeTalon.set(ControlMode.PercentOutput, IntakeConstants.ROLL_IN_SPEED);
+      intakeVictor.set(ControlMode.PercentOutput, IntakeConstants.ROLL_IN_SPEED);
   }
   public void intakeOut(){
-      intakeTalon.set(ControlMode.PercentOutput, IntakeConstants.ROLL_OUT_SPEED);
+      intakeVictor.set(ControlMode.PercentOutput, IntakeConstants.ROLL_OUT_SPEED);
   }
   public void intakeStop(){
-      intakeTalon.set(ControlMode.PercentOutput, 0);
+      intakeVictor.set(ControlMode.PercentOutput, 0);
   }
   public IntakeStatus getIntakePosition(){
       return intakeStatus;
   }
 
-  public double getAngle(){
-    double [] ypr = new double[3];
-    tempGyro.getYawPitchRoll(ypr);
-    return ypr[0];
-  }
-
-  public TalonSRX getIntakeVictor(){
-    return intakeTalon;
-  }
-
-  public void resetGyro(){
-    tempGyro.setYaw(0);
+  public VictorSPX getIntakeVictor(){
+    return intakeVictor;
   }
 }
