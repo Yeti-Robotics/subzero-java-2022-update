@@ -5,7 +5,6 @@ import frc.robot.Constants;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.utils.Limelight;
 
-import java.sql.SQLOutput;
 
 
 public class SetCalcHoodAngleCommand extends CommandBase {

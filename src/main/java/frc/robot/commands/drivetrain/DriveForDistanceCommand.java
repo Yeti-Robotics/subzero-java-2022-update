@@ -7,7 +7,6 @@ package frc.robot.commands.drivetrain;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ShiftingGearSubsystem;
-import frc.robot.subsystems.ShiftingGearSubsystem.ShiftStatus;
 
 public class DriveForDistanceCommand extends CommandBase {
   private final DrivetrainSubsystem drivetrainSubsystem;

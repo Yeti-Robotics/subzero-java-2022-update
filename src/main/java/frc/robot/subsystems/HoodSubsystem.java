@@ -1,8 +1,5 @@
 
 package frc.robot.subsystems;
-
-import com.revrobotics.CANDigitalInput;
-import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxLimitSwitch;
@@ -11,11 +8,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxLimitSwitch.Type;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
-import frc.robot.Constants.CalcConstants;
 import frc.robot.Constants.HoodConstants;
-import frc.robot.Constants.ShooterConstants;
-import frc.robot.utils.Limelight;
 
 public class HoodSubsystem extends SubsystemBase {
   /** Creates a new HoodSubsystem. */
@@ -64,7 +57,7 @@ public class HoodSubsystem extends SubsystemBase {
   }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
 
   public boolean getBeamBreak(){
-    return beamBreak.get();
+    return beamBreak.isPressed();
   }
 
    public double calcHoodAngle(double distance) {

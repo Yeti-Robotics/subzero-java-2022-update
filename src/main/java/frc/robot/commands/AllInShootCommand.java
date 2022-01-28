@@ -10,7 +10,6 @@ import frc.robot.subsystems.HopperSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.PinchRollerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.utils.Limelight;
 
 public class AllInShootCommand extends CommandBase {
   /** Creates a new AllInShootCommand. */
