@@ -4,8 +4,11 @@ package frc.robot.subsystems;
 import com.revrobotics.CANDigitalInput;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxLimitSwitch;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxLimitSwitch.Type;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
@@ -17,15 +20,15 @@ import frc.robot.utils.Limelight;
 public class HoodSubsystem extends SubsystemBase {
   /** Creates a new HoodSubsystem. */
   private CANSparkMax hoodSpark;
-  private CANEncoder hoodEncoder;
-  private CANDigitalInput beamBreak;
+  private RelativeEncoder hoodEncoder;
+  private SparkMaxLimitSwitch beamBreak;
 
 
   public HoodSubsystem() {
     hoodSpark = new CANSparkMax(HoodConstants.HOOD_SPARK, MotorType.kBrushless);  
     hoodEncoder = hoodSpark.getEncoder();
     hoodSpark.setInverted(true);
-    beamBreak = hoodSpark.getReverseLimitSwitch(CANDigitalInput.LimitSwitchPolarity.kNormallyClosed);
+    beamBreak = hoodSpark.getReverseLimitSwitch(Type.kNormallyClosed);
     hoodSpark.setSoftLimit(SoftLimitDirection.kForward, (float)hoodEncoderFromAngle(HoodConstants.MAX_HOOD_ANGLE));
     hoodSpark.setSoftLimit(SoftLimitDirection.kReverse, (float)hoodEncoderFromAngle(0));
 
