@@ -16,14 +16,17 @@ public class LEDSubsystem extends SubsystemBase {
     ledStrip = new AddressableLED(LEDConstants.ADDRESSABLE_LED);
     ledBuffer = new AddressableLEDBuffer(LEDConstants.LED_COUNT);
     ledStrip.setLength(ledBuffer.getLength());
+    ledStrip.setData(ledBuffer);
+    ledStrip.start();
+    ledBuffer.getLED(0);
   }
 
   public void setHSV(int i, int hue, int saturation, int value){
       ledBuffer.setHSV(i, hue, saturation, value);
   }
   
-  public void setRGB(int i, int red, int green, int cyan){
-   ledBuffer.setRGB(i, red, green, cyan);
+  public void setRGB(int i, int red, int green, int blue){
+   ledBuffer.setRGB(i, red, green, blue);
   }
 
   public int getBufferLength(){

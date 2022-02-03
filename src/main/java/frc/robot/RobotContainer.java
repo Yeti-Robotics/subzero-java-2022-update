@@ -14,6 +14,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AllInCommand;
 import frc.robot.commands.AllInShootCommand;
 import frc.robot.commands.AllOutCommand;
+import frc.robot.commands.LED.AuroraLEDCommand;
+import frc.robot.commands.LED.GradientLEDCommand;
+import frc.robot.commands.LED.RainbowLEDCommand;
+import frc.robot.commands.LED.SetLEDYetiBlueCommand;
 import frc.robot.commands.autonav.BarrelRacingCommandGroup;
 import frc.robot.commands.autonav.BouncePathCommandGroup;
 import frc.robot.commands.autonav.SlalomCommandGroup;
@@ -175,11 +179,10 @@ public class RobotContainer {
             
             setXboxDPadWhileHeld(Direction.LEFT, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED));//left
             setXboxDPadWhileHeld(Direction.RIGHT, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
-            
-            setXboxButtonWhenPressed(xboxController, Button.kA, new TurnToTargetPIDCommand(turretSubsystem));
-            setXboxButtonWhenPressed(xboxController, Button.kB, new ToggleShooterCommand(shooterSubsystem));
-            setXboxButtonWhileHeld(xboxController, Button.kY, new TestHoodCommand(hoodSubsystem, HoodConstants.HOOD_SPEED));// up
-            setXboxButtonWhileHeld(xboxController, Button.kX, new TestHoodCommand(hoodSubsystem, -HoodConstants.HOOD_SPEED));// down
+            setXboxButtonWhenPressed(xboxController, Button.kA, new GradientLEDCommand(ledSubsystem, 139, 300));
+            setXboxButtonWhenPressed(xboxController, Button.kB, new RainbowLEDCommand(ledSubsystem, 4));
+            setXboxButtonWhenPressed(xboxController, Button.kY, new AuroraLEDCommand(ledSubsystem));// up
+            setXboxButtonWhenPressed(xboxController, Button.kX, new SetLEDYetiBlueCommand(ledSubsystem));// down
         }
     }
 
