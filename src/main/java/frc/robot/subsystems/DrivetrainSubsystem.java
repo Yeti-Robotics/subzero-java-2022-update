@@ -8,6 +8,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 // the WPILib BSD license file in the root directory of this project.
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.PigeonIMU;
+import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -17,6 +18,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.ADIS16448_IMU;
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -31,7 +33,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private MotorControllerGroup rightMotors;
 
   private PigeonIMU gyro;
-  private ADIS16448_IMU tempGyro;
+  private AHRS navX;
 
   // tracks robot pose (where it is on the field) using gyro & encoder values
   private DifferentialDriveOdometry odometry; 
@@ -64,7 +66,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     rightMotors.setInverted(true);
     
     gyro = new PigeonIMU(DriveConstants.GYRO_ID);
-    tempGyro = new ADIS16448_IMU();
+    navX = new AHRS(I2C.Port.kOnboard);
 
     odometry = new DifferentialDriveOdometry(getHeading());
     feedforward = new SimpleMotorFeedforward(AutoConstants.ksVolts, AutoConstants.kvVoltSecondsPerMeters, AutoConstants.kaVoltSecondsSquaredPerMeter);
@@ -92,6 +94,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     wheelSpeeds.rightMetersPerSecond = getMetersPerSecondFromEncoder(rightFalcon1.getSelectedSensorVelocity()); 
     // update pose using gyro and encoder values
     pose = odometry.update(getHeading(), wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
+
+    System.out.println("navX: " + getTempAngle());
   }
 
   public void tankDrive(double leftpower, double rightpower) {
@@ -206,6 +210,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public double getTempAngle(){
-    return tempGyro.getAngle(); // ?
+    return navX.getAngle(); // ?
+  }
+
+  public void resetTempGyro(){
+    navX.reset();
   }
 }
