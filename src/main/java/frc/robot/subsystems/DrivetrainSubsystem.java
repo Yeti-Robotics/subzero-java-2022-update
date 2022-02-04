@@ -33,7 +33,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private MotorControllerGroup rightMotors;
 
   private PigeonIMU gyro;
-  private AHRS navX;
+  // private AHRS navX;
 
   // tracks robot pose (where it is on the field) using gyro & encoder values
   private DifferentialDriveOdometry odometry; 
@@ -66,7 +66,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     rightMotors.setInverted(true);
     
     gyro = new PigeonIMU(DriveConstants.GYRO_ID);
-    navX = new AHRS(I2C.Port.kOnboard);
+    // navX = new AHRS(I2C.Port.kOnboard);
 
     odometry = new DifferentialDriveOdometry(getHeading());
     feedforward = new SimpleMotorFeedforward(AutoConstants.ksVolts, AutoConstants.kvVoltSecondsPerMeters, AutoConstants.kaVoltSecondsSquaredPerMeter);
@@ -95,7 +95,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // update pose using gyro and encoder values
     pose = odometry.update(getHeading(), wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
 
-    System.out.println("navX: " + getTempAngle());
+    // System.out.println("navX: " + getTempAngle());
   }
 
   public void tankDrive(double leftpower, double rightpower) {
@@ -209,11 +209,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
     return Rotation2d.fromDegrees(-getAngle()); 
   }
 
-  public double getTempAngle(){
-    return navX.getAngle(); // ?
-  }
+  // public double getTempAngle(){
+  //   return navX.getAngle(); // ?
+  // }
 
-  public void resetTempGyro(){
-    navX.reset();
-  }
+  // public void resetTempGyro(){
+  //   navX.reset();
+  // }
 }

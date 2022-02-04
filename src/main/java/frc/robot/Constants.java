@@ -38,17 +38,17 @@ public final class Constants {
 
   public static final class AutoConstants {
     //The KS Value on Sysid
-    public static final double ksVolts = 0.580784; //0.65952
+    public static final double ksVolts = 0.60757; 
     //The Kv Value on Sysid
-    public static final double kvVoltSecondsPerMeters = 5.7048; //0.089694
+    public static final double kvVoltSecondsPerMeters = 5.5;
     //The Ka Value on Sysid
-    public static final double kaVoltSecondsSquaredPerMeter = 0.29626; //0.0054003
+    public static final double kaVoltSecondsSquaredPerMeter = 0.36364; 
 
     //The Kp Value on Sysid
-    public static final double kPDriveVel = 5.4511; //0.2266
+    public static final double kPDriveVel = 6.0628;
 
-    public static final double kTrackWidthInches = 21.5;
-    public static final double trackWidthMeters = 0.5461;
+    // public static final double kTrackWidthInches = 21.5;
+    public static final double trackWidthMeters = 0.61943;
 
     // converts desired linear & angular velocities to desired velocities 
     // for the left & right sides of the drivetrain
@@ -59,8 +59,8 @@ public final class Constants {
     public static final double kRamseteZeta = 0.7;
 
     // note: copy pasted directly
-    public static final double kMaxSpeedMetersPerSecond = 3.0;
-    public static final double kMaxAccelerationMetersPerSecondSquared = 3.0;
+    public static final double kMaxSpeedMetersPerSecond = 1.0;
+    public static final double kMaxAccelerationMetersPerSecondSquared = 1.0;
   }
 
   public static final class OIConstants {

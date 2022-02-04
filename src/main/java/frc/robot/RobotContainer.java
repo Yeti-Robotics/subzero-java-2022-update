@@ -27,8 +27,12 @@ import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.math.util.Units;
@@ -50,6 +54,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -257,6 +262,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
+
         var autoVoltageConstraint =
             new DifferentialDriveVoltageConstraint(
                 new SimpleMotorFeedforward(
@@ -266,68 +272,46 @@ public class RobotContainer {
                 ),
             AutoConstants.kinematics,
             10.5);
-
         
         // Create config for trajectory
         TrajectoryConfig config = new TrajectoryConfig(
-            Units.inchesToMeters(DriveConstants.MAX_SPEED_INCHES_PER_SEC),
-            Units.inchesToMeters(DriveConstants.MAX_ACCEL_INCHES_PER_SEC2))
+            // Units.inchesToMeters(DriveConstants.MAX_SPEED_INCHES_PER_SEC),
+            // Units.inchesToMeters(DriveConstants.MAX_ACCEL_INCHES_PER_SEC2))
+            AutoConstants.kMaxSpeedMetersPerSecond, 
+            AutoConstants.kMaxAccelerationMetersPerSecondSquared)
             // Add kinematics to ensure max speed is actually obeyed
             .setKinematics(AutoConstants.kinematics)
             // Apply the voltage constraint
             .addConstraint(autoVoltageConstraint);
 
-            // An example trajectory to follow.  All units in meters.
-            // Trajectory exampleTrajectory =
-            //     TrajectoryGenerator.generateTrajectory(
-            //         // Start at the origin facing the +X direction
-            //         new Pose2d(0, 0, new Rotation2d(0)),
-            //         // Pass through these two interior waypoints, making an 's' curve path
-            //         List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-            //         // End 3 meters straight ahead of where we started, facing forward
-            //         new Pose2d(3, 0, new Rotation2d(0)),
-            //         // Pass config
-            //         config);
+        Trajectory customTrajectory = TrajectoryGenerator.generateTrajectory(
+            // Start at the origin facing the +X direction
+            new Pose2d(0, 0, new Rotation2d(0)),
+            // Pass through these two interior waypoints, making an 's' curve path
+            List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+            // End 3 meters straight ahead of where we started, facing forward
+            new Pose2d(3, 0, new Rotation2d(0)),
+            // Pass config
+            config);
 
-            // Trajectory exampleTrajectory = 
-            //     TrajectoryGenerator.generateTrajectory(
-            //         List.of(
-            //             new Pose2d(0, 0, new Rotation2d(0)), 
-            //             new Pose2d(1, 0, new Rotation2d(0))
-            //         ),
-            //         config);
-
-          /*  Trajectory exampleTrajectory =
-                TrajectoryGenerator.generateTrajectory(
-                    // Start at the origin facing the +X direction
-                    new Pose2d(0, 0, new Rotation2d(0)),
-                    // Curve right and then left
-                    List.of(new Translation2d(1, 1)),
-                    // End 2 meters straight ahead
-                    new Pose2d(2, 0, new Rotation2d(0)),
-                    // Pass config
-                    config); */
-
-            Trajectory customTrajectory = customTrajectory();
-
-            RamseteCommand ramseteCommand =     
-                new RamseteCommand(
-                    customTrajectory,
-                    drivetrainSubsystem::getPose,
-                    new RamseteController(AutoConstants.kRamseteB, AutoConstants.kRamseteZeta),
-                    new SimpleMotorFeedforward(
-                        AutoConstants.ksVolts,
-                        AutoConstants.kvVoltSecondsPerMeters,
-                        AutoConstants.kaVoltSecondsSquaredPerMeter
-                    ),
-                    AutoConstants.kinematics,
-                    drivetrainSubsystem::getDifferentialDriveSpeeds,
-                    new PIDController(AutoConstants.kPDriveVel, 0, 0),
-                    new PIDController(AutoConstants.kPDriveVel, 0, 0),
-                    // RamseteCommand passes volts to the callback
-                    drivetrainSubsystem::tankDriveVolts,
-                    drivetrainSubsystem
-                );
+        RamseteCommand ramseteCommand =     
+            new RamseteCommand(
+                customTrajectory,
+                drivetrainSubsystem::getPose,
+                new RamseteController(AutoConstants.kRamseteB, AutoConstants.kRamseteZeta),
+                new SimpleMotorFeedforward(
+                    AutoConstants.ksVolts,
+                    AutoConstants.kvVoltSecondsPerMeters,
+                    AutoConstants.kaVoltSecondsSquaredPerMeter
+                ),
+                AutoConstants.kinematics,
+                drivetrainSubsystem::getDifferentialDriveSpeeds,
+                new PIDController(AutoConstants.kPDriveVel, 0, 0),
+                new PIDController(AutoConstants.kPDriveVel, 0, 0),
+                // RamseteCommand passes volts to the callback
+                drivetrainSubsystem::tankDriveVolts,
+                drivetrainSubsystem
+            );
 
         // Reset odometry to the starting pose of the trajectory.
         drivetrainSubsystem.resetOdometry(customTrajectory.getInitialPose());
@@ -350,8 +334,6 @@ public class RobotContainer {
           return null;
         }
     }
-
-    // RamseteCommand(Trajectory, Supplier<Pose2d>, RamseteController, SimpleMotorFeedforward, DifferentialDriveKinematics, drivetrainSubsystem::getWheelSpeeds, PIDController, PIDController, drivetrainSubsystem::tankDriveVolts, DrivetrainSubsystem) is undefined
 
     // public boolean getButtonStatus(Joystick joystick, int button) {
     //     return driverStationJoystick.getRawButton(button);
