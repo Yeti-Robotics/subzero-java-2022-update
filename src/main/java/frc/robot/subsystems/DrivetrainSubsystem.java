@@ -9,7 +9,9 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 // the WPILib BSD license file in the root directory of this project.
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.PigeonIMU;
+import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
@@ -20,6 +22,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private WPI_TalonFX leftFalcon1, leftFalcon2, rightFalcon1, rightFalcon2;  
 
   private PigeonIMU gyro;
+  private AHRS navX;
   
   // The robot's drive
   public final DifferentialDrive m_drive;
@@ -54,13 +57,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
     resetEncoders();
   
     gyro = new PigeonIMU(DriveConstants.GYRO_ID);
+    navX = new AHRS(I2C.Port.kOnboard);
 
     driveMode = DriveMode.CHEEZY;
   }
 
   @Override
   public void periodic(){
-    // System.out.println(getAngle());
+    System.out.println("navX: " + getNavX());
   }
 
   public void tankDrive(double leftpower, double rightpower) {
@@ -121,5 +125,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public void setDriveMode(DriveMode driveMode){
     this.driveMode = driveMode;
+  }
+
+  public double getNavX(){
+    return navX.getAngle();
+  }
+
+  public void resetNavX(){
+    navX.reset();
   }
 }

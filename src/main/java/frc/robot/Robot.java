@@ -91,7 +91,7 @@ public class Robot extends TimedRobot {
     // System.out.println("hood angle: " + m_robotContainer.hoodSubsystem.hoodAngleFromEncoder(m_robotContainer.hoodSubsystem.getEncoder()));
     
     m_robotContainer.updateIsDriverStation();
-    System.out.println("isDriverStation: " + m_robotContainer.isDriverStation);
+    // System.out.println("isDriverStation: " + m_robotContainer.isDriverStation);
 
     CommandScheduler.getInstance().run();
   }
@@ -135,6 +135,7 @@ public class Robot extends TimedRobot {
     // continue until interrupted by another command, remove
     // this line or comment it out.
     m_robotContainer.drivetrainSubsystem.resetGyro();
+    m_robotContainer.drivetrainSubsystem.resetNavX();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
