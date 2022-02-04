@@ -6,12 +6,15 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LEDConstants;
 
 public class LEDSubsystem extends SubsystemBase {
   private AddressableLED ledStrip;
   private AddressableLEDBuffer ledBuffer;
+  private int r,g,b;
+
   public LEDSubsystem() {
     ledStrip = new AddressableLED(LEDConstants.ADDRESSABLE_LED);
     ledBuffer = new AddressableLEDBuffer(LEDConstants.LED_COUNT);
@@ -19,6 +22,20 @@ public class LEDSubsystem extends SubsystemBase {
     ledStrip.setData(ledBuffer);
     ledStrip.start();
     ledBuffer.getLED(0);
+    SmartDashboard.putNumber("r", r);
+    SmartDashboard.putNumber("g", g);
+    SmartDashboard.putNumber("b", b);
+  }
+  @Override
+  public void periodic() {
+    super.periodic();
+    r = (int) SmartDashboard.getNumber("r", r);
+    g = (int) SmartDashboard.getNumber("g", g);
+    b = (int) SmartDashboard.getNumber("b", b);
+    for (int i = 0; i < ledBuffer.getLength(); i++) {
+      setRGB(i, r, g, b);
+    }
+    sendData();
   }
 
   public void setHSV(int i, int hue, int saturation, int value){
