@@ -323,7 +323,7 @@ public class RobotContainer {
     }
 
     public Trajectory customTrajectory(){
-        String trajectoryJSON = "paths/basic_curve.wpilib.json";
+        String trajectoryJSON = "pathplanner/generatedJSON/testPath.wpilib.json";
         Trajectory trajectory;
         // Trajectory trajectory = new Trajectory();
         System.out.println("PathWeaverTest initialized");

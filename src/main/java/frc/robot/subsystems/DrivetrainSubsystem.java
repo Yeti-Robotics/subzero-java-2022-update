@@ -96,7 +96,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     pose = odometry.update(getHeading(), wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
 
     // System.out.println("navX: " + getTempAngle());
-    System.out.println(getAngle());
+    // System.out.println(getAngle());
   }
 
   public void tankDrive(double leftpower, double rightpower) {
