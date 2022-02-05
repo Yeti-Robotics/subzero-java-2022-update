@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ShooterSubsystem;
 
 public class ToggleShooterCommand extends CommandBase {
-  private final ShooterSubsystem shooterSubsystem;
+  protected final ShooterSubsystem shooterSubsystem;
   public ToggleShooterCommand(ShooterSubsystem shooterSubsystem) {
     this.shooterSubsystem = shooterSubsystem;
     addRequirements(shooterSubsystem);
@@ -19,6 +19,7 @@ public class ToggleShooterCommand extends CommandBase {
 
   @Override
   public void execute() {
+    System.out.println("rpm: " + this.shooterSubsystem.getFlywheelRPM() + " , setpoint: " + this.shooterSubsystem.setPoint);
     if (ShooterSubsystem.getShooterStatus() == ShooterSubsystem.shooterStatus.OFF) {
       shooterSubsystem.shootFlywheel();
     } else {

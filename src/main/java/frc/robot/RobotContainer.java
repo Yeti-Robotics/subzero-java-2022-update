@@ -45,6 +45,7 @@ import frc.robot.commands.shooter.StopFullIntakeCommand;
 import frc.robot.commands.shooter.StopShooterCommand;
 import frc.robot.commands.shooter.ShootingCommand;
 import frc.robot.commands.shooter.ToggleShooterCommand;
+import frc.robot.commands.shooter.ToggleShooterWithLEDCommand;
 import frc.robot.commands.turret.CalibrateTurretCommand;
 import frc.robot.commands.turret.TurnToAnglePIDCommand;
 import frc.robot.commands.turret.TurnToTargetPIDCommand;
@@ -114,6 +115,8 @@ public class RobotContainer {
         ledSubsystem = new LEDSubsystem();
         shiftingGearSubsystem = new ShiftingGearSubsystem();
         buttonMap = new HashMap<>();
+
+        ledSubsystem.setDefaultCommand(new SetLEDYetiBlueCommand(ledSubsystem));
         
         switch (drivetrainSubsystem.getDriveMode()) {
             case TANK:
@@ -180,9 +183,9 @@ public class RobotContainer {
             
             setXboxDPadWhileHeld(Direction.LEFT, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED));//left
             setXboxDPadWhileHeld(Direction.RIGHT, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
-            setXboxButtonWhenPressed(xboxController, Button.kA, new GradientLEDCommand(ledSubsystem, 139, 300));
+            setXboxButtonWhenPressed(xboxController, Button.kA, new ToggleShooterWithLEDCommand(shooterSubsystem, ledSubsystem));
             setXboxButtonWhenPressed(xboxController, Button.kB, new RainbowLEDCommand(ledSubsystem, 4));
-            setXboxButtonWhenPressed(xboxController, Button.kY, new BlinkLEDCommand(ledSubsystem, 750, 255, 119, 0));// up
+            setXboxButtonWhenPressed(xboxController, Button.kY, new BlinkLEDCommand(ledSubsystem, 750, 5, 255, 119, 0));// up
             setXboxButtonWhenPressed(xboxController, Button.kX, new SetLEDYetiBlueCommand(ledSubsystem));// down
         }
     }
