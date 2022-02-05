@@ -19,6 +19,7 @@ import frc.robot.commands.LED.BlinkLEDCommand;
 import frc.robot.commands.LED.GradientLEDCommand;
 import frc.robot.commands.LED.RainbowLEDCommand;
 import frc.robot.commands.LED.SetLEDYetiBlueCommand;
+import frc.robot.commands.LED.SnowfallLEDCommand;
 import frc.robot.commands.autonav.BarrelRacingCommandGroup;
 import frc.robot.commands.autonav.BouncePathCommandGroup;
 import frc.robot.commands.autonav.SlalomCommandGroup;
@@ -183,7 +184,7 @@ public class RobotContainer {
             
             setXboxDPadWhileHeld(Direction.LEFT, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED));//left
             setXboxDPadWhileHeld(Direction.RIGHT, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
-            setXboxButtonWhenPressed(xboxController, Button.kA, new ToggleShooterWithLEDCommand(shooterSubsystem, ledSubsystem));
+            setXboxButtonWhenPressed(xboxController, Button.kA, new SnowfallLEDCommand(ledSubsystem, 300));
             setXboxButtonWhenPressed(xboxController, Button.kB, new RainbowLEDCommand(ledSubsystem, 4));
             setXboxButtonWhenPressed(xboxController, Button.kY, new BlinkLEDCommand(ledSubsystem, 750, 5, 255, 119, 0));// up
             setXboxButtonWhenPressed(xboxController, Button.kX, new SetLEDYetiBlueCommand(ledSubsystem));// down
