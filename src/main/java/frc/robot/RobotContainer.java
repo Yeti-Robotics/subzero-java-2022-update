@@ -185,7 +185,7 @@ public class RobotContainer {
             setXboxDPadWhileHeld(Direction.RIGHT, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
             setXboxButtonWhenPressed(xboxController, Button.kA, new ToggleShooterWithLEDCommand(shooterSubsystem, ledSubsystem));
             setXboxButtonWhenPressed(xboxController, Button.kB, new RainbowLEDCommand(ledSubsystem, 4));
-            setXboxButtonWhenPressed(xboxController, Button.kY, new BlinkLEDCommand(ledSubsystem, 750, 5, 255, 119, 0));// up
+            setXboxButtonWhenPressed(xboxController, Button.kY, new BlinkLEDCommand(ledSubsystem, 300, 255, 34, 0).withTimeout(5));// up
             setXboxButtonWhenPressed(xboxController, Button.kX, new SetLEDYetiBlueCommand(ledSubsystem));// down
         }
     }

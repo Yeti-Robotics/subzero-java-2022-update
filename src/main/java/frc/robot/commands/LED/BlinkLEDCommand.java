@@ -13,14 +13,12 @@ public class BlinkLEDCommand extends CommandBase {
   long startTime;
   int waitTime;
   int r, g, b;
-  int duration;
   boolean on = true;
 
-  public BlinkLEDCommand(LEDSubsystem ledSubsystem, int waitTime, int duration, int r, int g, int b) {
+  public BlinkLEDCommand(LEDSubsystem ledSubsystem, int waitTime, int r, int g, int b) {
     this.ledSubsystem = ledSubsystem;
     this.startTime = System.currentTimeMillis();
     this.waitTime = waitTime;
-    this.duration = duration;
     this.r = r;
     this.g = g;
     this.b = b;
@@ -34,7 +32,6 @@ public class BlinkLEDCommand extends CommandBase {
       ledSubsystem.setRGB(i, r, g, b);
     }
     ledSubsystem.sendData();
-    withTimeout(duration);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
