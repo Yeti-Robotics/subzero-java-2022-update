@@ -15,12 +15,19 @@ public class LEDSubsystem extends SubsystemBase {
   private AddressableLEDBuffer ledBuffer;
   private int r,g,b;
 
+  public enum LEDStripStatus {
+    OFF, ON
+  }
+
+  public LEDStripStatus stripStatus;
+
   public LEDSubsystem() {
     ledStrip = new AddressableLED(LEDConstants.ADDRESSABLE_LED);
     ledBuffer = new AddressableLEDBuffer(LEDConstants.LED_COUNT);
     ledStrip.setLength(ledBuffer.getLength());
     ledStrip.setData(ledBuffer);
     ledStrip.start();
+    stripStatus = LEDStripStatus.ON;
     ledBuffer.getLED(0);
     SmartDashboard.putNumber("r", r);
     SmartDashboard.putNumber("g", g);
@@ -28,14 +35,14 @@ public class LEDSubsystem extends SubsystemBase {
   }
   @Override
   public void periodic() {
-    super.periodic();
-    r = (int) SmartDashboard.getNumber("r", r);
-    g = (int) SmartDashboard.getNumber("g", g);
-    b = (int) SmartDashboard.getNumber("b", b);
-    for (int i = 0; i < ledBuffer.getLength(); i++) {
-      setRGB(i, r, g, b);
-    }
-    sendData();
+    // super.periodic();
+    // r = (int) SmartDashboard.getNumber("r", r);
+    // g = (int) SmartDashboard.getNumber("g", g);
+    // b = (int) SmartDashboard.getNumber("b", b);
+    // for (int i = 0; i < ledBuffer.getLength(); i++) {
+    //   setRGB(i, r, g, b);
+    // }
+    // sendData();
   }
 
   public void setHSV(int i, int hue, int saturation, int value){
@@ -52,6 +59,16 @@ public class LEDSubsystem extends SubsystemBase {
 
   public void sendData(){
     ledStrip.setData(ledBuffer);
+  }
+
+  public void stopLEDStrip() {
+    ledStrip.stop();
+    stripStatus = LEDStripStatus.OFF;
+  }
+
+  public void startLEDStrip() {
+    ledStrip.start();
+    stripStatus = LEDStripStatus.ON;
   }
 
 }
