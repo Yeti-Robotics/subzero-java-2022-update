@@ -284,15 +284,17 @@ public class RobotContainer {
             // Apply the voltage constraint
             .addConstraint(autoVoltageConstraint);
 
-        Trajectory customTrajectory = TrajectoryGenerator.generateTrajectory(
-            // Start at the origin facing the +X direction
-            new Pose2d(0, 0, new Rotation2d(0)),
-            // Pass through these two interior waypoints, making an 's' curve path
-            List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-            // End 3 meters straight ahead of where we started, facing forward
-            new Pose2d(3, 0, new Rotation2d(0)),
-            // Pass config
-            config);
+        Trajectory customTrajectory = customTrajectory();
+
+        // Trajectory customTrajectory = TrajectoryGenerator.generateTrajectory(
+        //     // Start at the origin facing the +X direction
+        //     new Pose2d(0, 0, new Rotation2d(0)),
+        //     // Pass through these two interior waypoints, making an 's' curve path
+        //     List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+        //     // End 3 meters straight ahead of where we started, facing forward
+        //     new Pose2d(3, 0, new Rotation2d(0)),
+        //     // Pass config
+        //     config);
 
         RamseteCommand ramseteCommand =     
             new RamseteCommand(
@@ -321,7 +323,7 @@ public class RobotContainer {
     }
 
     public Trajectory customTrajectory(){
-        String trajectoryJSON = "paths/defaultpath.wpilib.json";
+        String trajectoryJSON = "paths/basic_curve.wpilib.json";
         Trajectory trajectory;
         // Trajectory trajectory = new Trajectory();
         System.out.println("PathWeaverTest initialized");

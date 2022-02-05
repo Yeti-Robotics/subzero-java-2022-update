@@ -96,6 +96,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     pose = odometry.update(getHeading(), wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
 
     // System.out.println("navX: " + getTempAngle());
+    System.out.println(getAngle());
   }
 
   public void tankDrive(double leftpower, double rightpower) {
@@ -203,10 +204,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   private Rotation2d getHeading(){
-    // negative applied because gyro (presumably) returns positive degrees 
-    // as the gyro turns ccw; we want the opposite, as the opposite is true 
-    // in math / on the unit circle
-    return Rotation2d.fromDegrees(-getAngle()); 
+    return Rotation2d.fromDegrees(getAngle()); 
   }
 
   // public double getTempAngle(){
