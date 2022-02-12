@@ -7,6 +7,11 @@ package frc.robot;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.commands.LED.AuroraLEDCommand;
+import frc.robot.commands.LED.BlinkLEDCommand;
+import frc.robot.commands.LED.SetLEDYetiBlueCommand;
 import org.opencv.core.Rect;
 import org.opencv.imgproc.Imgproc;
 
@@ -30,6 +35,8 @@ import frc.robot.utils.GalacticSearch;
  */
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
+  private Command beforeBlinkCommand = null;
+  private boolean blinkWarningRan = false;
   public static List<RobotInput> inputSequence = new ArrayList<RobotInput>();
 	public static List<RobotInput> recentInputSequence = new ArrayList<RobotInput>();
 
@@ -91,19 +98,23 @@ public class Robot extends TimedRobot {
     // System.out.println("hood angle: " + m_robotContainer.hoodSubsystem.hoodAngleFromEncoder(m_robotContainer.hoodSubsystem.getEncoder()));
     
     m_robotContainer.updateIsDriverStation();
-    System.out.println("isDriverStation: " + m_robotContainer.isDriverStation);
-
     CommandScheduler.getInstance().run();
+
+    SmartDashboard.putData(m_robotContainer.ledSubsystem);
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    m_robotContainer.ledSubsystem.setDefaultCommand(new AuroraLEDCommand(m_robotContainer.ledSubsystem));
+  }
 
   @Override
   public void disabledPeriodic() {
     // maxRPM = 0.0;
     // maxEncoder = 0.0;
+    CommandScheduler.getInstance().run();
+
     if(m_robotContainer.turretSubsystem.getReverseLimit()){
       m_robotContainer.turretSubsystem.resetEncoder();
     }
@@ -116,6 +127,8 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    m_robotContainer.ledSubsystem.setDefaultCommand(new AuroraLEDCommand(m_robotContainer.ledSubsystem));
+
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
@@ -134,6 +147,18 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
+    m_robotContainer.ledSubsystem.getCurrentCommand().cancel();
+    m_robotContainer.ledSubsystem.setDefaultCommand(new SetLEDYetiBlueCommand(m_robotContainer.ledSubsystem));
+
+    CommandScheduler.getInstance().onCommandFinish(command -> {
+      if (command.getName().equals(new BlinkLEDCommand().getName())) {
+        if (beforeBlinkCommand != null) beforeBlinkCommand.schedule();
+      }
+    });
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.cancel();
+    }
+
     m_robotContainer.drivetrainSubsystem.resetGyro();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
@@ -143,31 +168,10 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    if (RobotInput.getRecordingState()) {
-      RobotInput currentInput = new RobotInput();
-      switch (m_robotContainer.drivetrainSubsystem.getDriveMode()) {
-        case TANK:
-          currentInput.setJoystickYAxis(RobotInput.Joystick.LEFT, m_robotContainer.getLeftY());
-          currentInput.setJoystickYAxis(RobotInput.Joystick.RIGHT, m_robotContainer.getRightY());
-          break;
-        case CHEEZY:
-        case ARCADE:
-          currentInput.setJoystickYAxis(RobotInput.Joystick.LEFT, m_robotContainer.getLeftY());
-          currentInput.setJoystickXAxis(RobotInput.Joystick.RIGHT, m_robotContainer.getRightX());
-          break;
-      }
-      currentInput.setJoystickYAxis(RobotInput.Joystick.LEFT, m_robotContainer.getLeftY());
-      currentInput.setJoystickXAxis(RobotInput.Joystick.RIGHT, m_robotContainer.getRightX());
-      for (int i = 1; i <= m_robotContainer.getButtonMap().size(); i++){
-        if (m_robotContainer.driverStationJoystick.getRawButton(i)){
-          if (m_robotContainer.getButtonMap().get(i).getClass() != PlayRecordingCommand.class &&
-                  m_robotContainer.getButtonMap().get(i).getClass() != TerminateAndSaveRecordingCommand.class &&
-                  m_robotContainer.getButtonMap().get(i).getClass() != InitiateRecordingCommand.class){
-            currentInput.setButtonState(i, true);
-          }
-        }
-      }
-      inputSequence.add(currentInput);
+    if (DriverStation.getMatchTime() < 130 && !blinkWarningRan) {
+      beforeBlinkCommand = m_robotContainer.ledSubsystem.getCurrentCommand();
+      new BlinkLEDCommand(m_robotContainer.ledSubsystem, 300, 255, 34, 0).schedule();
+      blinkWarningRan = true;
     }
   }
 

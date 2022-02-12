@@ -6,14 +6,19 @@ package frc.robot.commands.LED;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.LEDSubsystem;
-import frc.robot.subsystems.LEDSubsystem.LEDStripStatus;
 
 public class BlinkLEDCommand extends CommandBase {
   LEDSubsystem ledSubsystem;
+  long commandScheduleTime;
   long startTime;
   int waitTime;
   int r, g, b;
   boolean on = true;
+
+  /**
+   * Dont use this
+   */
+  public BlinkLEDCommand() {}
 
   public BlinkLEDCommand(LEDSubsystem ledSubsystem, int waitTime, int r, int g, int b) {
     this.ledSubsystem = ledSubsystem;
@@ -32,6 +37,7 @@ public class BlinkLEDCommand extends CommandBase {
       ledSubsystem.setRGB(i, r, g, b);
     }
     ledSubsystem.sendData();
+    commandScheduleTime = System.currentTimeMillis();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -62,6 +68,6 @@ public class BlinkLEDCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return commandScheduleTime + 5000 <= System.currentTimeMillis();
   }
 }

@@ -5,12 +5,16 @@
 package frc.robot.commands.shooter;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.commands.LED.ShooterLEDCommand;
 import frc.robot.subsystems.ShooterSubsystem;
 
 public class ToggleShooterCommand extends CommandBase {
-  protected final ShooterSubsystem shooterSubsystem;
-  public ToggleShooterCommand(ShooterSubsystem shooterSubsystem) {
+  private final ShooterSubsystem shooterSubsystem;
+  private final ShooterLEDCommand ledCommand;
+
+  public ToggleShooterCommand(ShooterSubsystem shooterSubsystem, ShooterLEDCommand ledCommand) {
     this.shooterSubsystem = shooterSubsystem;
+    this.ledCommand = ledCommand;
     addRequirements(shooterSubsystem);
   }
 
@@ -19,11 +23,12 @@ public class ToggleShooterCommand extends CommandBase {
 
   @Override
   public void execute() {
-    System.out.println("rpm: " + this.shooterSubsystem.getFlywheelRPM() + " , setpoint: " + this.shooterSubsystem.setPoint);
-    if (ShooterSubsystem.getShooterStatus() == ShooterSubsystem.shooterStatus.OFF) {
+    if (ShooterSubsystem.getShooterStatus() == ShooterSubsystem.ShooterStatus.OFF) {
       shooterSubsystem.shootFlywheel();
+      ledCommand.schedule();
     } else {
       shooterSubsystem.stopFlywheel();
+      ledCommand.cancel();
     }
   }
 

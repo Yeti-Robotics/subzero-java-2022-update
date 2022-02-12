@@ -19,16 +19,19 @@ public class SetLEDYetiBlueCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    System.out.println("SetLEDYetiBlueCommand.initialize");
     for (int i = 0; i < ledSubsystem.getBufferLength(); i++) {
-    ledSubsystem.setRGB(i, 20, 120, 255); 
-    // i dont know if this is the correct value
+      ledSubsystem.setRGB(i, 20, 120, 255);
+      // i dont know if this is the correct value
     }
     ledSubsystem.sendData();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+    ledSubsystem.sendData();
+  }
 
   // Called once the command ends or is interrupted.
   @Override

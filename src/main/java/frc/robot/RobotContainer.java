@@ -14,12 +14,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AllInCommand;
 import frc.robot.commands.AllInShootCommand;
 import frc.robot.commands.AllOutCommand;
-import frc.robot.commands.LED.AuroraLEDCommand;
-import frc.robot.commands.LED.BlinkLEDCommand;
-import frc.robot.commands.LED.GradientLEDCommand;
-import frc.robot.commands.LED.RainbowLEDCommand;
-import frc.robot.commands.LED.SetLEDYetiBlueCommand;
-import frc.robot.commands.LED.SnowfallLEDCommand;
+import frc.robot.commands.LED.*;
 import frc.robot.commands.autonav.BarrelRacingCommandGroup;
 import frc.robot.commands.autonav.BouncePathCommandGroup;
 import frc.robot.commands.autonav.SlalomCommandGroup;
@@ -46,7 +41,6 @@ import frc.robot.commands.shooter.StopFullIntakeCommand;
 import frc.robot.commands.shooter.StopShooterCommand;
 import frc.robot.commands.shooter.ShootingCommand;
 import frc.robot.commands.shooter.ToggleShooterCommand;
-import frc.robot.commands.shooter.ToggleShooterWithLEDCommand;
 import frc.robot.commands.turret.CalibrateTurretCommand;
 import frc.robot.commands.turret.TurnToAnglePIDCommand;
 import frc.robot.commands.turret.TurnToTargetPIDCommand;
@@ -135,6 +129,7 @@ public class RobotContainer {
     }
     
     private void configureButtonBindings() {
+        ShooterLEDCommand shooterLEDCommand = new ShooterLEDCommand(ledSubsystem, shooterSubsystem);
         // POWER PORT ROBOT CONTROLS
         // setJoystickButtonWhenPressed(driverStationJoystick, 1, new TurnToTargetPIDCommand(turretSubsystem));
         // setJoystickButtonWhenPressed(driverStationJoystick, 2, new ToggleIntakePistonCommand(intakeSubsystem));
@@ -152,7 +147,7 @@ public class RobotContainer {
             driverStationJoystick = new Joystick(OIConstants.DRIVER_STATION_JOY);
             setJoystickButtonWhenPressed(driverStationJoystick, 1, new TurnToTargetPIDCommand(turretSubsystem));
             setJoystickButtonWhileHeld(driverStationJoystick, 2, new AllInCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
-            setJoystickButtonWhenPressed(driverStationJoystick, 3, new ToggleShooterCommand(shooterSubsystem));
+            setJoystickButtonWhenPressed(driverStationJoystick, 3, new ToggleShooterCommand(shooterSubsystem, shooterLEDCommand));
             setJoystickButtonWhileHeld(driverStationJoystick, 4, new TestHoodCommand(hoodSubsystem, HoodConstants.HOOD_SPEED)); //up
             setJoystickButtonWhileHeld(driverStationJoystick, 5, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED)); //right
             
@@ -187,7 +182,8 @@ public class RobotContainer {
             setXboxButtonWhenPressed(xboxController, Button.kA, new SnowfallLEDCommand(ledSubsystem, 100));
             setXboxButtonWhenPressed(xboxController, Button.kB, new RainbowLEDCommand(ledSubsystem, 4));
             setXboxButtonWhenPressed(xboxController, Button.kY, new BlinkLEDCommand(ledSubsystem, 300, 255, 34, 0).withTimeout(5));// up
-            setXboxButtonWhenPressed(xboxController, Button.kX, new SetLEDYetiBlueCommand(ledSubsystem));// down
+            // Toggle shooter will run with the LED effects, ends when either command ends
+            setXboxButtonWhenPressed(xboxController, Button.kX, new ToggleShooterCommand(shooterSubsystem, shooterLEDCommand));
         }
     }
 
@@ -267,7 +263,7 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         Command command = new PlayRecordingCommand("1616845434755recording.txt", drivetrainSubsystem);
-        return command;
+        return null;
     }
 
     public boolean getButtonStatus(Joystick joystick, int button) {
