@@ -21,9 +21,9 @@ public final class Constants {
 
   public static final class DriveConstants {
     public static final int LEFT_FALCON_1 = 1;
-    public static final int LEFT_FALCON_2 = 2;
+    public static final int LEFT_FALCON_2 = 4;
     public static final int RIGHT_FALCON_1 = 3;
-    public static final int RIGHT_FALCON_2 = 4;
+    public static final int RIGHT_FALCON_2 = 2;
 
     public static final double HIGH_GEAR_RATIO = 5.533243;// fudge values  // 6.86;// JVN Values
     public static final double LOW_GEAR_RATIO = 8.01801; // fudge values // 9.93;// JVN Values
@@ -80,7 +80,7 @@ public final class Constants {
     public static final int TURRET_SPARK = 10;
     
     public static final double COUNTS_PER_REVOLUTION = 42.0;
-    public static final double TURRET_GEAR_RATIO = 227.5 / 1.0; //325.0/1.0;
+    public static final double TURRET_GEAR_RATIO = 227.5 / 1.0; 
     public static final double COUNTS_PER_DEGREE = (TURRET_GEAR_RATIO) / 360.0;
     public static final double TURRET_ANGLE_THRESHOLD = 5.0;
     public static final double TURRET_MIN_ANGLE = 0.0;

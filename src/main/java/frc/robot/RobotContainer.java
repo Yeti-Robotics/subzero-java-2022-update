@@ -46,6 +46,7 @@ import frc.robot.commands.shooter.ToggleShooterCommand;
 import frc.robot.commands.turret.CalibrateTurretCommand;
 import frc.robot.commands.turret.TurnToAnglePIDCommand;
 import frc.robot.commands.turret.TurnToTargetPIDCommand;
+
 import frc.robot.commands.turret.TurretTestCommand;
 import frc.robot.commands.xbox.XboxRumbleCommand;
 import frc.robot.commands.xbox.XboxToggleRumbleCommand;
@@ -114,16 +115,18 @@ public class RobotContainer {
         shiftingGearSubsystem = new ShiftingGearSubsystem();
         xboxSubsystem = new XboxSubsystem();
         buttonMap = new HashMap<>();
+
+        
         
         switch (drivetrainSubsystem.getDriveMode()) {
             case TANK:
                 drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.tankDrive(getLeftY(), getRightY()), drivetrainSubsystem));
                 break;
             case CHEEZY:
-                drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.cheezyDrive(getLeftY(), getRightX()), drivetrainSubsystem));
+                drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.cheezyDrive(getRightX(), -getLeftY()), drivetrainSubsystem));
                 break;
             case ARCADE:
-                drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.arcadeDrive(getLeftY(), getRightX()), drivetrainSubsystem));
+                drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.arcadeDrive(getRightX(), -getLeftY()), drivetrainSubsystem));
                 break;
         }
         // Configure the button bindings
@@ -185,19 +188,19 @@ public class RobotContainer {
     }
 
     public double getLeftY() {
-        return (isDriverStation) ? -driverStationJoystick.getRawAxis(0) : -xboxSubsystem.getController().getLeftY();
+        return (isDriverStation) ? -driverStationJoystick.getRawAxis(0) : (xboxSubsystem.getController().getLeftY());
     }
 
     public double getLeftX() {
-        return (isDriverStation) ? driverStationJoystick.getRawAxis(1) : -xboxSubsystem.getController().getLeftX();
+        return (isDriverStation) ? driverStationJoystick.getRawAxis(1) : (-xboxSubsystem.getController().getLeftX());
     }
 
     public double getRightY() {
-        return (isDriverStation) ? -driverStationJoystick.getRawAxis(2) : -xboxSubsystem.getController().getRightY();
+        return (isDriverStation) ? -driverStationJoystick.getRawAxis(2) : (-xboxSubsystem.getController().getRightY());
     }
 
     public double getRightX() {
-        return (isDriverStation) ? driverStationJoystick.getRawAxis(3) : -xboxSubsystem.getController().getRightX();
+        return (isDriverStation) ? driverStationJoystick.getRawAxis(3) : (-xboxSubsystem.getController().getRightX());
     }
 
     public HashMap<Integer, CommandBase> getButtonMap() {
