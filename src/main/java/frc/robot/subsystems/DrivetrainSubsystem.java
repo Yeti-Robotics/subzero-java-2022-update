@@ -38,6 +38,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     rightFalcon2 = new WPI_TalonFX(DriveConstants.RIGHT_FALCON_2);
 
     rightFalcon1.setInverted(true);
+    leftFalcon1.setInverted(true);
 
     leftFalcon2.follow(leftFalcon1);
     leftFalcon2.setInverted(InvertType.FollowMaster);
@@ -68,7 +69,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public void cheezyDrive(double straight, double turn) {
-    m_drive.curvatureDrive(straight, -turn, false);
+    m_drive.curvatureDrive(straight, -turn, true);
   }
 
   public void arcadeDrive(double straight, double turn) {
