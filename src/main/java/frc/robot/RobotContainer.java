@@ -177,8 +177,8 @@ public class RobotContainer {
             xboxSubsystem.getController().setTriggerWhileHeld(Hand.LEFT, new AllOutCommand(pinchRollerSubsystem, intakeSubsystem, hopperSubsystem));
             setXboxButtonWhileHeld(xboxSubsystem.getController(), Button.kLeftBumper, new IntakeOutCommand(intakeSubsystem));
             
-            xboxSubsystem.getController().setDPadWhileHeld(Direction.LEFT, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED));//left
-            xboxSubsystem.getController().setDPadWhileHeld(Direction.RIGHT, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
+           // xboxSubsystem.getController().setDPadWhileHeld(Direction.LEFT, new TurretTestCommand(turretSubsystem, -TurretConstants.TURRET_SPEED));//left
+           // xboxSubsystem.getController().setDPadWhileHeld(Direction.RIGHT, new TurretTestCommand(turretSubsystem, TurretConstants.TURRET_SPEED));//right
             
             setXboxButtonWhenPressed(xboxSubsystem.getController(), Button.kA, new TurnToTargetPIDCommand(turretSubsystem));
             setXboxButtonWhenPressed(xboxSubsystem.getController(), Button.kB, new ToggleShooterCommand(shooterSubsystem));
