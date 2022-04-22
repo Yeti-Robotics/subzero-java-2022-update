@@ -123,7 +123,7 @@ public class RobotContainer {
                 drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.tankDrive(getLeftY(), getRightY()), drivetrainSubsystem));
                 break;
             case CHEEZY:
-                drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.cheezyDrive(getRightX(), -getLeftY()), drivetrainSubsystem));
+                drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.cheezyDrive(getRightX(), getLeftY()), drivetrainSubsystem));
                 break;
             case ARCADE:
                 drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> drivetrainSubsystem.arcadeDrive(getRightX(), -getLeftY()), drivetrainSubsystem));
