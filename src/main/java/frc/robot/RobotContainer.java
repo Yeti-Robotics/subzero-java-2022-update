@@ -188,7 +188,7 @@ public class RobotContainer {
     }
 
     public double getLeftY() {
-        return (isDriverStation) ? -driverStationJoystick.getRawAxis(0) : (xboxSubsystem.getController().getLeftY());
+        return (isDriverStation) ? driverStationJoystick.getRawAxis(0) : (xboxSubsystem.getController().getLeftY());
     }
 
     public double getLeftX() {
