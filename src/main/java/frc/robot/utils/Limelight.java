@@ -2,7 +2,6 @@ package frc.robot.utils;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import frc.robot.Constants;
 import frc.robot.Constants.CalcConstants;
 
 

@@ -12,25 +12,25 @@ public class XController extends XboxController {
 
 	public void setTriggerWhenPressed(Hand triggerSide, CommandBase command){
         if(triggerSide == Hand.LEFT){ 
-            new XboxTrigger(this, triggerSide).whenActive(command);
+            new XboxTrigger(this, triggerSide).onTrue(command);
         } else {
-            new XboxTrigger(this, triggerSide).whenActive(command);
+            new XboxTrigger(this, triggerSide).onTrue(command);
         }
     }
 
 	public void setTriggerWhileHeld(Hand triggerSide, CommandBase command){
         if(triggerSide == Hand.LEFT) { 
-            new XboxTrigger(this, triggerSide).whileActiveContinuous(command);
+            new XboxTrigger(this, triggerSide).whileTrue(command);
         } else {
-            new XboxTrigger(this, triggerSide).whileActiveContinuous(command);
+            new XboxTrigger(this, triggerSide).whileTrue(command);
         }
     }
 
 	public void setDPadWhenPressed(Direction direction, CommandBase command) {
-        new XboxDPad(this, direction).whenActive(command);
+        new XboxDPad(this, direction).onTrue(command);
     }
 
 	public void setDPadWhileHeld(Direction direction, CommandBase command) {
-        new XboxDPad(this, direction).whileActiveContinuous(command);
+        new XboxDPad(this, direction).whileTrue(command);
     }
 }

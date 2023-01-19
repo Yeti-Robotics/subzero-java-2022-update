@@ -8,7 +8,6 @@
 package frc.robot.commands.replay;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Robot;
 
 public class InitiateRecordingCommand extends CommandBase {
   /**

@@ -4,7 +4,6 @@
 
 package frc.robot.utils;
 
-import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OIConstants;
@@ -18,13 +17,11 @@ public class XboxTrigger extends Trigger {
     private Hand hand;
 
     public XboxTrigger(XboxController xboxController, Hand hand){
+        super(() -> {
+            double raw = (hand == Hand.LEFT) ? xboxController.getLeftTriggerAxis() : xboxController.getRightTriggerAxis();
+            return raw >= OIConstants.TRIGGER_THRESHOLD;
+        });
         this.hand = hand;
         this.xboxController = xboxController; 
-    }
-
-    @Override
-    public boolean get(){
-        double raw = (hand == Hand.LEFT) ? xboxController.getLeftTriggerAxis() : xboxController.getRightTriggerAxis();
-        return raw >= OIConstants.TRIGGER_THRESHOLD;
     }
 }

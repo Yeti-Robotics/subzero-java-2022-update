@@ -9,57 +9,28 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AllInCommand;
-import frc.robot.commands.AllInShootCommand;
 import frc.robot.commands.AllOutCommand;
-import frc.robot.commands.autonav.BarrelRacingCommandGroup;
-import frc.robot.commands.autonav.BouncePathCommandGroup;
-import frc.robot.commands.autonav.SlalomCommandGroup;
-import frc.robot.commands.drivetrain.DriveForDistanceCommand;
 import frc.robot.commands.drivetrain.ToggleShiftingCommand;
-import frc.robot.commands.drivetrain.DriveForDistanceLowPIDCommand;
-import frc.robot.commands.drivetrain.DriveForDistanceProfiledPIDCommand;
-import frc.robot.commands.drivetrain.ToggleDriveModeCommand;
-import frc.robot.commands.drivetrain.TurnForAnglePIDCommand;
-import frc.robot.commands.groups.AimTurretAndHoodCommandGroup;
-import frc.robot.commands.groups.FireBallCommandGroup;
-import frc.robot.commands.hood.SetCalcHoodAngleCommand;
 import frc.robot.commands.hood.TestHoodCommand;
-import frc.robot.commands.hopper.HopperInCommand;
 import frc.robot.commands.intake.IntakeInCommand;
 import frc.robot.commands.intake.IntakeInCommandWithRumble;
 import frc.robot.commands.intake.IntakeOutCommand;
 import frc.robot.commands.intake.ToggleIntakePistonCommand;
-import frc.robot.commands.pinchroller.PinchRollerInCommand;
-import frc.robot.commands.replay.InitiateRecordingCommand;
 import frc.robot.commands.replay.PlayRecordingCommand;
-import frc.robot.commands.replay.TerminateAndSaveRecordingCommand;
-import frc.robot.commands.shooter.SpinToRPMCommand;
-import frc.robot.commands.shooter.StopFullIntakeCommand;
-import frc.robot.commands.shooter.StopShooterCommand;
-import frc.robot.commands.shooter.ShootingCommand;
 import frc.robot.commands.shooter.ToggleShooterCommand;
-import frc.robot.commands.turret.CalibrateTurretCommand;
-import frc.robot.commands.turret.TurnToAnglePIDCommand;
 import frc.robot.commands.turret.TurnToTargetPIDCommand;
 
 import frc.robot.commands.turret.TurretTestCommand;
-import frc.robot.commands.xbox.XboxRumbleCommand;
-import frc.robot.commands.xbox.XboxToggleRumbleCommand;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.*;
-import frc.robot.subsystems.DrivetrainSubsystem.DriveMode;
 import frc.robot.utils.Limelight;
-import frc.robot.utils.XController;
 import frc.robot.utils.XboxDPad;
-import frc.robot.utils.XboxTrigger;
 import frc.robot.utils.XboxDPad.Direction;
 import frc.robot.utils.XboxTrigger.Hand;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -208,30 +179,30 @@ public class RobotContainer {
     }
 
     private void setJoystickButtonWhenPressed(Joystick joystick, int button, CommandBase command) {
-        new JoystickButton(joystick, button).whenPressed(command);
+        new JoystickButton(joystick, button).onTrue(command);
         buttonMap.put(button, command);
     }
 
     private void setJoystickButtonWhileHeld(Joystick joystick, int button, CommandBase command) {
-        new JoystickButton(joystick, button).whileHeld(command);
+        new JoystickButton(joystick, button).whileTrue(command);
         buttonMap.put(button, command);
     }
 
     // Xbox controller equivalents
     private void setXboxButtonWhenPressed(XboxController xboxController, Button button, CommandBase command) {
-        new JoystickButton(xboxController, button.value).whenPressed(command);
+        new JoystickButton(xboxController, button.value).onTrue(command);
     }
 
     private void setXboxButtonWhileHeld(XboxController xboxController, Button button, CommandBase command) {
-        new JoystickButton(xboxController, button.value).whileHeld(command);
+        new JoystickButton(xboxController, button.value).whileTrue(command);
     }
 
     private void setXboxDPadWhenPressed(Direction direction, CommandBase command) {
-        new XboxDPad(xboxSubsystem.getController(), direction).whenPressed(command);
+        new XboxDPad(xboxSubsystem.getController(), direction).onTrue(command);
     }
 
     private void setXboxDPadWhileHeld(Direction direction, CommandBase command) {
-        new XboxDPad(xboxSubsystem.getController(), direction).whileHeld(command);
+        new XboxDPad(xboxSubsystem.getController(), direction).whileTrue(command);
     }
 
     public void updateIsDriverStation(){
@@ -240,7 +211,7 @@ public class RobotContainer {
         if (prev == isDriverStation) {
             return;
         } else {
-            commandScheduler.clearButtons();
+            commandScheduler.getActiveButtonLoop().clear();
             configureButtonBindings();
         }
     }

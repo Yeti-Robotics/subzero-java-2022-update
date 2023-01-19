@@ -1,13 +1,17 @@
 package frc.robot.utils;
 
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.button.Button;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-public class XboxDPad extends Button {
+public class XboxDPad extends Trigger {
 	private XboxController xboxController;
 	private Direction direction;
 	
 	public XboxDPad(XboxController xboxController, Direction direction) {
+		super(() -> {
+			int value = xboxController.getPOV();
+			return Math.abs(value - direction.value) <= 45;
+		});
 		this.xboxController = xboxController;
 		this.direction = direction;
 	};
@@ -21,10 +25,4 @@ public class XboxDPad extends Button {
 			value = direction;
 		}
 	}
-
-	public boolean get() {
-		int value = xboxController.getPOV();
-		return Math.abs(value - direction.value) <= 45;
-	}
-
 }
