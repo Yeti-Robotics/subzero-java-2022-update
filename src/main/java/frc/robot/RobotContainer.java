@@ -49,7 +49,7 @@ public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private CommandScheduler commandScheduler;
     public Joystick driverStationJoystick;
-    private XboxSubsystem xboxSubsystem;
+    public XboxSubsystem xboxSubsystem;
     public boolean isDriverStation;
 
     public DrivetrainSubsystem drivetrainSubsystem;
@@ -159,7 +159,7 @@ public class RobotContainer {
     }
 
     public double getLeftY() {
-        return (isDriverStation) ? driverStationJoystick.getRawAxis(0) : (xboxSubsystem.getController().getLeftY());
+        return (isDriverStation) ? driverStationJoystick.getRawAxis(0) : -(xboxSubsystem.getController().getLeftY());
     }
 
     public double getLeftX() {

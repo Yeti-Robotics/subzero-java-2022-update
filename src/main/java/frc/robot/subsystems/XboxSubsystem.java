@@ -11,7 +11,7 @@ public class XboxSubsystem extends SubsystemBase {
 
 	public XboxSubsystem() {
 		int port = (DriverStation.getJoystickIsXbox(0)) ? 0 : 1;
-		controller = new XController(port);
+		controller = new XController(0);
 	}
 
 	public XController getController() {

@@ -92,6 +92,7 @@ public class Robot extends TimedRobot {
     
     m_robotContainer.updateIsDriverStation();
     System.out.println("isDriverStation: " + m_robotContainer.isDriverStation);
+    System.out.println(m_robotContainer.xboxSubsystem.getController().getPort());
 
     CommandScheduler.getInstance().run();
   }
